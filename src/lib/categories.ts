@@ -26,7 +26,7 @@ export const CATEGORIES: Category[] = [
   { id: "kumzitz", label: "זיץ / הופעה", emoji: "🎶", keywords: ["זיץ", "הופעה", "מופע", "קונצרט"] },
   { id: "students", label: "תלמידים", emoji: "🎓", keywords: ["תלמיד", "תלמידי", "ילד הפלא", "ילד פלא", "ילדים"] },
   { id: "studio", label: "אולפן", emoji: "🎚️", keywords: ["אולפן", "סנטור", "santoor"] },
-  { id: "covers", label: "קאברים", emoji: "🎷", keywords: ["קאבר", "cover"] },
+  { id: "saxophone", label: "סקסופון", emoji: "🎷", keywords: ["סקסופון", "saxophone"] },
   { id: "other", label: "אחר", emoji: "🎵", keywords: [] },
 ];
 
