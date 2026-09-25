@@ -38,8 +38,10 @@ async function main() {
   console.log(`\n${report.total} events, ${events.reduce((n, e) => n + e.videos.length, 0)} videos`);
   for (const e of report.newEvents) console.log(`  + new event: ${e.title}`);
   for (const v of report.newVideos) console.log(`  + new video in "${v.eventTitle}": ${v.title}`);
-  for (const e of report.removedEvents) console.log(`  - removed: ${e.title}`);
-  if (!report.newEvents.length && !report.newVideos.length && !report.removedEvents.length) console.log("  nothing new");
+  for (const e of report.removedEvents) console.log(`  - removed event: ${e.title}`);
+  for (const v of report.removedVideos) console.log(`  - removed from "${v.eventTitle}": ${v.title}`);
+  const counts = [report.newEvents, report.newVideos, report.removedEvents, report.removedVideos];
+  if (counts.every((list) => !list.length)) console.log("  nothing new");
 
   if (dryRun) return console.log("\n(dry run, nothing saved)");
 

@@ -48,6 +48,7 @@ export interface SyncReport {
   newEvents: { id: string; title: string }[];
   newVideos: { eventId: string; eventTitle: string; title: string }[];
   removedEvents: { id: string; title: string }[];
+  removedVideos: { eventId: string; eventTitle: string; title: string }[];
   mirrored?: number;
   mirrorPending?: number;
 }

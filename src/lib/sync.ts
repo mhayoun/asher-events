@@ -67,6 +67,11 @@ export function mergeEvents(
   now = new Date().toISOString(),
 ): { events: EventItem[]; report: SyncReport } {
   const previous = new Map(existing.map((e) => [e.id, e]));
+  // Deleting a folder in Drive removes its event, but an empty listing almost certainly means Drive
+  // failed or the folder was unshared, not that every event was deleted: never wipe the site for that.
+  if (existing.length && !folders.some((f) => f.videos.length))
+    throw new Error("Drive listing came back empty - keeping the current events");
+
   // The public view has no sizes and only day-precision dates: keep what we already know about each video.
   if (source === "public") {
     const known = new Map(existing.flatMap((e) => e.videos).map((v) => [v.id, v]));
@@ -84,7 +89,7 @@ export function mergeEvents(
   existing.forEach((e) => rememberAuto(e.categories));
   Object.values(overrides).forEach((o) => rememberAuto(o.categories ?? []));
 
-  const report: SyncReport = { at: now, source, total: 0, newEvents: [], newVideos: [], removedEvents: [] };
+  const report: SyncReport = { at: now, source, total: 0, newEvents: [], newVideos: [], removedEvents: [], removedVideos: [] };
 
   const events = folders
     .filter((f) => f.videos.length > 0) // empty folders are events still being uploaded
@@ -101,6 +106,9 @@ export function mergeEvents(
         const known = new Set(prev.videos.map((v) => v.id));
         for (const v of built.videos)
           if (!known.has(v.id)) report.newVideos.push({ eventId: built.id, eventTitle: built.title, title: v.title });
+        const still = new Set(built.videos.map((v) => v.id));
+        for (const v of prev.videos)
+          if (!still.has(v.id)) report.removedVideos.push({ eventId: built.id, eventTitle: built.title, title: v.title });
       }
       return { ...built, addedAt: prev?.addedAt ?? (firstRun ? folder.createdTime : now) };
     })

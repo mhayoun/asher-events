@@ -30,7 +30,14 @@ export async function POST(request: Request) {
     return e.videos.filter((v) => !known.has(v.id)).map((v) => `${e.title} · ${v.title}`);
   });
   const removedEvents = shown.filter((e) => !freshIds.has(e.id)).map((e) => e.title);
+  const freshById = new Map(fresh.map((e) => [e.id, e]));
+  const removedItems = shown.flatMap((e) => {
+    const after = freshById.get(e.id);
+    if (!after) return [];
+    const still = new Set(after.videos.map((v) => v.id));
+    return e.videos.filter((v) => !still.has(v.id)).map((v) => `${e.title} · ${v.title}`);
+  });
 
   revalidateTag(DRIVE_CACHE_TAG, { expire: 0 });
-  return Response.json({ ok: true, total: fresh.length, newEvents, newItems, removedEvents });
+  return Response.json({ ok: true, total: fresh.length, newEvents, newItems, removedEvents, removedItems });
 }

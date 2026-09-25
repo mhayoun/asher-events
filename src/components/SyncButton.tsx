@@ -5,7 +5,7 @@ import { useState } from "react";
 
 const PASSWORD_KEY = "sync-password";
 
-type Result = { newEvents: string[]; newItems: string[]; removedEvents: string[] };
+type Result = { newEvents: string[]; newItems: string[]; removedEvents: string[]; removedItems: string[] };
 
 function readSaved(): string {
   try {
@@ -56,7 +56,8 @@ export function SyncButton() {
       const lines = [
         ...r.newEvents.map((t) => `אירוע חדש: ${t}`),
         ...r.newItems.map((t) => `קטע חדש: ${t}`),
-        ...r.removedEvents.map((t) => `הוסר: ${t}`),
+        ...r.removedEvents.map((t) => `אירוע הוסר: ${t}`),
+        ...r.removedItems.map((t) => `קטע הוסר: ${t}`),
       ];
       setStatus("done");
       setMessage(lines.length ? [...lines, "האתר עודכן ✓"] : ["אין חדש בדרייב - האתר מעודכן ✓"]);
