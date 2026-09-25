@@ -22,7 +22,9 @@ export interface EventVideo {
   title: string;
   size: number;
   modifiedTime: string;
-  /** Copy on Vercel Blob (optional mirror). When present the site plays it with a native <video>. */
+  /** Set for audio recordings (mp3, m4a, ...); videos leave it out. */
+  kind?: "audio";
+  /** Copy on Vercel Blob (optional mirror). When present the site plays it natively. */
   url?: string;
 }
 

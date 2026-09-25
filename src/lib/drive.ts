@@ -11,6 +11,9 @@ export function hasDriveCredentials(): boolean {
 }
 
 const VIDEO_EXT = /\.(mp4|m4v|mov|avi|mkv|webm|3gp|mpg|mpeg|wmv)$/i;
+const AUDIO_EXT = /\.(mp3|m4a|wav|aac|ogg|oga|flac|wma)$/i;
+
+export const isMediaMime = (mime: string) => mime.startsWith("video/") || mime.startsWith("audio/");
 
 /** "10/8/25" (US format used by the public view) → ISO. Times ("10:30 AM") mean today. */
 function parsePublicDate(text: string): string {
@@ -46,12 +49,19 @@ async function listPublicChildren(folderId: string) {
     const id = chunk.match(/id="entry-([^"]+)"/)?.[1] ?? "";
     const isFolder = /href="[^"]*\/folders\//.test(chunk);
     const isVideo = /alt="Video"/.test(chunk);
+    const isAudio = /alt="Audio"/.test(chunk);
     const name = decodeHtml(chunk.match(/flip-entry-title">([^<]*)/)?.[1]?.trim() ?? "");
     const modified = parsePublicDate(chunk.match(/flip-entry-last-modified"><div>([^<]*)/)?.[1] ?? "");
     return {
       id,
       name,
-      mimeType: isFolder ? FOLDER_MIME : isVideo || VIDEO_EXT.test(name) ? "video/mp4" : "application/octet-stream",
+      mimeType: isFolder
+        ? FOLDER_MIME
+        : isVideo || VIDEO_EXT.test(name)
+          ? "video/mp4"
+          : isAudio || AUDIO_EXT.test(name)
+            ? "audio/mpeg"
+            : "application/octet-stream",
       createdTime: modified,
       modifiedTime: modified,
     };
@@ -103,7 +113,7 @@ async function listChildren(parentId: string, auth: Awaited<ReturnType<typeof au
   return files;
 }
 
-/** Streams a file's bytes from Drive (used to mirror videos to Vercel Blob). */
+/** Streams a file's bytes from Drive (used to mirror media to Vercel Blob). */
 export async function fetchDriveMedia(fileId: string): Promise<Response> {
   if (!hasDriveCredentials()) {
     const res = await fetch(`https://drive.usercontent.google.com/download?id=${fileId}&export=download&confirm=t`, {
@@ -122,8 +132,8 @@ export async function fetchDriveMedia(fileId: string): Promise<Response> {
 }
 
 /**
- * Every direct sub-folder of the root is an event. Videos inside nested sub-folders
- * are flattened into their top-level event.
+ * Every direct sub-folder of the root is an event. Its videos and audio recordings (also those in
+ * nested sub-folders) are its media items, kept in `videos` for historical reasons.
  */
 export async function fetchDriveFolders(rootId = ROOT_FOLDER_ID): Promise<DriveFolder[]> {
   const auth = hasDriveCredentials() ? await authParams() : null;
@@ -132,7 +142,7 @@ export async function fetchDriveFolders(rootId = ROOT_FOLDER_ID): Promise<DriveF
 
   async function collectVideos(folderId: string): Promise<DriveVideo[]> {
     const children = await list(folderId);
-    const videos = children.filter((f) => f.mimeType.startsWith("video/"));
+    const videos = children.filter((f) => isMediaMime(f.mimeType));
     const nested = await Promise.all(children.filter((f) => f.mimeType === FOLDER_MIME).map((f) => collectVideos(f.id)));
     return [...videos, ...nested.flat()];
   }

@@ -8,7 +8,8 @@ export const revalidate = 3600;
 
 export default async function Home() {
   const events = await getPublicEvents();
-  const videos = events.reduce((n, e) => n + e.videos.length, 0);
+  const media = events.flatMap((e) => e.videos);
+  const audio = media.filter((m) => m.kind === "audio").length;
   const categories = new Set(events.flatMap((e) => e.categories)).size;
   const years = events.map((e) => Number(e.date.slice(0, 4)));
   const span = years.length ? `${Math.min(...years)}–${Math.max(...years)}` : "";
@@ -31,7 +32,8 @@ export default async function Home() {
           <dl className="mt-8 flex flex-wrap gap-8">
             {[
               [events.length, "אירועים"],
-              [videos, "סרטונים"],
+              [media.length - audio, "סרטונים"],
+              ...(audio ? [[audio, "הקלטות"]] : []),
               [Math.min(categories, CATEGORIES.length), "סוגי אירועים"],
               [span, "שנים"],
             ].map(([value, label]) => (

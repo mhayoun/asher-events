@@ -22,7 +22,14 @@ export function VideoPlayer({ videos, emoji }: { videos: EventVideo[]; emoji: st
     <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
       <div>
         <div className="relative aspect-video overflow-hidden rounded-2xl border border-line bg-black shadow-2xl">
-          {current.url ? (
+          {current.url && current.kind === "audio" ? (
+            <div className="absolute inset-0 grid place-items-center bg-[radial-gradient(circle_at_50%_30%,#3b2d52,transparent_70%)] p-6">
+              <span className="text-7xl" aria-hidden>
+                🎧
+              </span>
+              <audio key={current.id} src={current.url} controls preload="metadata" className="w-full max-w-lg" />
+            </div>
+          ) : current.url ? (
             <video
               key={current.id}
               src={current.url}
@@ -64,12 +71,12 @@ export function VideoPlayer({ videos, emoji }: { videos: EventVideo[]; emoji: st
                 }`}
               >
                 <span className="relative aspect-video w-28 shrink-0 overflow-hidden rounded-lg bg-surface-2">
-                  <Thumbnail fileId={v.id} emoji={emoji} alt="" width={240} />
+                  <Thumbnail fileId={v.kind === "audio" ? undefined : v.id} emoji={v.kind === "audio" ? "🎧" : emoji} alt="" width={240} />
                   {active && <span className="absolute inset-0 grid place-items-center bg-black/50 text-gold">▶</span>}
                 </span>
                 <span className="min-w-0">
                   <span className="block text-xs text-muted">
-                    {i + 1} · {formatSize(v.size)}
+                    {[i + 1, formatSize(v.size)].filter(Boolean).join(" · ")}
                   </span>
                   <span className="line-clamp-2 font-medium">{v.title}</span>
                 </span>

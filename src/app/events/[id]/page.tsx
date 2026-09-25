@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { VideoPlayer } from "@/components/VideoPlayer";
 import { CATEGORY_BY_ID } from "@/lib/categories";
-import { driveFolderUrl, formatEventDate, thumbnailUrl } from "@/lib/format";
+import { driveFolderUrl, formatEventDate, mediaCount, thumbnailUrl } from "@/lib/format";
 import { getPublicEvents } from "@/lib/store";
 
 export const revalidate = 3600;
@@ -20,10 +20,11 @@ async function getEvent(id: string) {
 export async function generateMetadata({ params }: PageProps<"/events/[id]">): Promise<Metadata> {
   const event = await getEvent((await params).id);
   if (!event) return {};
+  const cover = event.videos.find((v) => v.kind !== "audio");
   return {
     title: event.title,
-    description: `${event.videos.length} סרטונים · ${formatEventDate(event)}`,
-    openGraph: event.videos[0] ? { images: [thumbnailUrl(event.videos[0].id, 1200)] } : undefined,
+    description: `${mediaCount(event.videos)} · ${formatEventDate(event)}`,
+    openGraph: cover ? { images: [thumbnailUrl(cover.id, 1200)] } : undefined,
   };
 }
 
@@ -52,7 +53,7 @@ export default async function EventPage({ params }: PageProps<"/events/[id]">) {
         <h1 className="mt-3 font-display text-3xl font-bold md:text-5xl">{event.title}</h1>
         <p className="mt-2 text-muted">
           {formatEventDate(event)}
-          {event.location && ` · ${event.location}`} · {event.videos.length} סרטונים ·{" "}
+          {event.location && ` · ${event.location}`} · {mediaCount(event.videos)} ·{" "}
           <a href={driveFolderUrl(event.id)} target="_blank" rel="noreferrer" className="text-gold hover:underline">
             התיקייה ב-Drive ↗
           </a>

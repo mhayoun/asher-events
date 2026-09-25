@@ -23,6 +23,7 @@ export const CATEGORIES: Category[] = [
   { id: "kumzitz", label: "זיץ / הופעה", emoji: "🎶", keywords: ["זיץ", "הופעה", "מופע", "קונצרט"] },
   { id: "students", label: "תלמידים", emoji: "🎓", keywords: ["תלמיד", "תלמידי", "ילד הפלא", "ילד פלא", "ילדים"] },
   { id: "studio", label: "אולפן", emoji: "🎚️", keywords: ["אולפן", "סנטור", "santoor"] },
+  { id: "covers", label: "קאברים", emoji: "🎷", keywords: ["קאבר", "cover"] },
   { id: "other", label: "אחר", emoji: "🎵", keywords: [] },
 ];
 
@@ -37,7 +38,7 @@ export function normalize(text: string): string {
     .toLowerCase()
     .replace(/[֑-ׇ]/g, "") // niqqud & cantillation
     .replace(/["'`׳״]/g, "")
-    .replace(/\.(mp4|m4v|mov|avi|mkv|webm)$/i, "")
+    .replace(/\.(mp4|m4v|mov|avi|mkv|webm|mp3|m4a|wav|aac|ogg|flac)$/i, "")
     .replace(/[_\-–.+,()]/g, " ")
     .replace(/וו/g, "ו")
     .replace(/יי/g, "י")

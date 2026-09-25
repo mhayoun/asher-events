@@ -14,6 +14,16 @@ export const embedUrl = (fileId: string) => `https://drive.google.com/file/d/${f
 export const driveFileUrl = (fileId: string) => `https://drive.google.com/file/d/${fileId}/view`;
 export const driveFolderUrl = (folderId: string) => `https://drive.google.com/drive/folders/${folderId}`;
 
+/** "4 סרטונים", "הקלטה אחת", "2 סרטונים · הקלטה אחת" */
+export function mediaCount(items: { kind?: "audio" }[]): string {
+  const audio = items.filter((m) => m.kind === "audio").length;
+  const video = items.length - audio;
+  const parts = [];
+  if (video) parts.push(video === 1 ? "סרטון אחד" : `${video} סרטונים`);
+  if (audio) parts.push(audio === 1 ? "הקלטה אחת" : `${audio} הקלטות`);
+  return parts.join(" · ");
+}
+
 const NEW_FOR_DAYS = 30;
 export function isNew(e: Pick<EventItem, "addedAt">, now = Date.now()): boolean {
   return now - new Date(e.addedAt).getTime() < NEW_FOR_DAYS * 86_400_000;

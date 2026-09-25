@@ -21,9 +21,9 @@ export async function mirrorVideos(
     log(`  uploading "${v.title}" (${e.title}) ${(v.size / 1_048_576).toFixed(0)} MB ...`);
     try {
       const media = await fetchDriveMedia(v.id);
-      const blob = await put(`videos/${e.id}/${v.id}.mp4`, media.body!, {
+      const blob = await put(`videos/${e.id}/${v.id}.${v.kind === "audio" ? "mp3" : "mp4"}`, media.body!, {
         access: "public",
-        contentType: media.headers.get("content-type") ?? "video/mp4",
+        contentType: media.headers.get("content-type") ?? (v.kind === "audio" ? "audio/mpeg" : "video/mp4"),
         multipart: true,
         addRandomSuffix: false,
         allowOverwrite: true,

@@ -9,7 +9,7 @@ function years(text: string): number[] {
 
 export function cleanVideoTitle(name: string): string {
   return name
-    .replace(/\.(mp4|m4v|mov|avi|mkv|webm)/gi, "")
+    .replace(/\.(mp4|m4v|mov|avi|mkv|webm|mp3|m4a|wav|aac|ogg|flac)/gi, "")
     .replace(/_/g, " ")
     .replace(/\s+/g, " ")
     .trim();
@@ -35,7 +35,13 @@ function inferDate(folder: DriveFolder): Pick<EventItem, "date" | "datePrecision
 
 export function buildEvent(folder: DriveFolder, override: Overrides[string] = {}): Omit<EventItem, "addedAt"> {
   const videos: EventVideo[] = folder.videos
-    .map((v) => ({ id: v.id, title: cleanVideoTitle(v.name), size: Number(v.size ?? 0), modifiedTime: v.modifiedTime }))
+    .map((v) => ({
+      id: v.id,
+      title: cleanVideoTitle(v.name),
+      size: Number(v.size ?? 0),
+      modifiedTime: v.modifiedTime,
+      ...(v.mimeType.startsWith("audio/") && { kind: "audio" as const }),
+    }))
     .sort((a, b) => a.title.localeCompare(b.title, "he", { numeric: true }));
 
   return {

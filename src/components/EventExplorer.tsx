@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { CATEGORIES, CATEGORY_BY_ID, normalize } from "@/lib/categories";
-import { formatEventDate, isNew } from "@/lib/format";
+import { formatEventDate, isNew, mediaCount } from "@/lib/format";
 import type { EventItem } from "@/lib/types";
 import { Thumbnail } from "./Thumbnail";
 
@@ -178,7 +178,7 @@ export function EventExplorer({ events }: { events: EventItem[] }) {
 
       <div className="mt-5 flex items-center justify-between text-sm text-muted">
         <span>
-          נמצאו {results.length} אירועים · {results.reduce((n, e) => n + e.videos.length, 0)} סרטונים
+          נמצאו {results.length} אירועים · {mediaCount(results.flatMap((e) => e.videos))}
         </span>
         {hasFilters && (
           <button onClick={() => {
@@ -223,13 +223,13 @@ function EventCard({ event: e }: { event: EventItem }) {
       className="group block overflow-hidden rounded-2xl border border-line bg-surface transition hover:-translate-y-0.5 hover:border-gold/60 hover:shadow-[0_10px_40px_-10px_#e3b45a40]"
     >
       <div className="relative aspect-video overflow-hidden bg-surface-2">
-        <Thumbnail fileId={e.videos[0]?.id} emoji={main.emoji} alt={e.title} />
+        <Thumbnail fileId={e.videos.find((v) => v.kind !== "audio")?.id} emoji={main.emoji} alt={e.title} />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent" />
         <span className="absolute inset-0 m-auto grid h-14 w-14 place-items-center rounded-full bg-gold/90 text-2xl text-bg opacity-0 transition group-hover:opacity-100">
           ▶
         </span>
         <span className="absolute bottom-2 left-2 rounded-md bg-black/70 px-2 py-0.5 text-xs">
-          {e.videos.length} {e.videos.length === 1 ? "סרטון" : "סרטונים"}
+          {mediaCount(e.videos)}
         </span>
         {isNew(e) && <span className="absolute top-2 right-2 rounded-md bg-gold px-2 py-0.5 text-xs font-bold text-bg">חדש</span>}
       </div>
