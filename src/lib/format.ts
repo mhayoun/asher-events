@@ -10,6 +10,9 @@ export function formatEventDate(e: Pick<EventItem, "date" | "datePrecision">): s
 export const thumbnailUrl = (fileId: string, width = 640) =>
   `https://drive.google.com/thumbnail?id=${fileId}&sz=w${width}`;
 
+/** Same-origin stream of a Drive file for <video>/<audio> (see app/api/media/[id]/route.ts). */
+export const mediaUrl = (fileId: string) => `/api/media/${fileId}`;
+
 export const embedUrl = (fileId: string) => `https://drive.google.com/file/d/${fileId}/preview`;
 export const driveFileUrl = (fileId: string) => `https://drive.google.com/file/d/${fileId}/view`;
 export const driveFolderUrl = (folderId: string) => `https://drive.google.com/drive/folders/${folderId}`;

@@ -120,10 +120,15 @@ async function listChildren(parentId: string, auth: Awaited<ReturnType<typeof au
   return files;
 }
 
-/** Streams a file's bytes from Drive (used to mirror media to Vercel Blob). */
-export async function fetchDriveMedia(fileId: string): Promise<Response> {
+/**
+ * Streams a file's bytes from Drive, optionally only a byte range ("bytes=0-1023").
+ * Used by the site's media route and to mirror media to Vercel Blob.
+ */
+export async function fetchDriveMedia(fileId: string, range?: string): Promise<Response> {
+  const rangeHeader: Record<string, string> = range ? { Range: range } : {};
   if (!hasDriveCredentials()) {
     const res = await fetch(`https://drive.usercontent.google.com/download?id=${fileId}&export=download&confirm=t`, {
+      headers: rangeHeader,
       cache: "no-store",
     });
     if (!res.ok || !res.body || res.headers.get("content-type")?.includes("text/html"))
@@ -133,7 +138,7 @@ export async function fetchDriveMedia(fileId: string): Promise<Response> {
   const auth = await authParams();
   const params = new URLSearchParams({ alt: "media", supportsAllDrives: "true" });
   if (auth.key) params.set("key", auth.key);
-  const res = await fetch(`${API}/${fileId}?${params}`, { headers: auth.headers, cache: "no-store" });
+  const res = await fetch(`${API}/${fileId}?${params}`, { headers: { ...auth.headers, ...rangeHeader }, cache: "no-store" });
   if (!res.ok || !res.body) throw new Error(`Drive download ${fileId} failed: ${res.status}`);
   return res;
 }
