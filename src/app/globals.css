@@ -1,0 +1,40 @@
+@import "tailwindcss";
+
+/* A dark "concert hall" palette: deep plum stage, warm gold spotlight. */
+:root {
+  --bg: #120f18;
+  --surface: #1c1824;
+  --surface-2: #262031;
+  --line: #342c42;
+  --fg: #f3eee6;
+  --muted: #a89fb5;
+  --gold: #e3b45a;
+  --gold-soft: #e3b45a26;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-gold: var(--gold);
+  --color-gold-soft: var(--gold-soft);
+  --font-sans: var(--font-heebo);
+  --font-display: var(--font-frank);
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-heebo), system-ui, sans-serif;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.8);
+}

@@ -1,0 +1,67 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { Suspense } from "react";
+import { VideoPlayer } from "@/components/VideoPlayer";
+import { CATEGORY_BY_ID } from "@/lib/categories";
+import { driveFolderUrl, formatEventDate, thumbnailUrl } from "@/lib/format";
+import { getPublicEvents } from "@/lib/store";
+
+export const revalidate = 3600;
+
+export async function generateStaticParams() {
+  return (await getPublicEvents()).map((e) => ({ id: e.id }));
+}
+
+async function getEvent(id: string) {
+  return (await getPublicEvents()).find((e) => e.id === id);
+}
+
+export async function generateMetadata({ params }: PageProps<"/events/[id]">): Promise<Metadata> {
+  const event = await getEvent((await params).id);
+  if (!event) return {};
+  return {
+    title: event.title,
+    description: `${event.videos.length} סרטונים · ${formatEventDate(event)}`,
+    openGraph: event.videos[0] ? { images: [thumbnailUrl(event.videos[0].id, 1200)] } : undefined,
+  };
+}
+
+export default async function EventPage({ params }: PageProps<"/events/[id]">) {
+  const event = await getEvent((await params).id);
+  if (!event) notFound();
+  const main = CATEGORY_BY_ID[event.categories[0]] ?? CATEGORY_BY_ID.other;
+
+  return (
+    <article className="mx-auto max-w-7xl px-4 py-8">
+      <Link href="/" className="text-sm text-muted hover:text-gold">
+        → כל האירועים
+      </Link>
+      <header className="mb-6 mt-3">
+        <div className="flex flex-wrap gap-2">
+          {event.categories.map((c) => (
+            <Link
+              key={c}
+              href={`/?cat=${c}`}
+              className="rounded-full border border-line bg-surface px-3 py-1 text-sm hover:border-gold"
+            >
+              {CATEGORY_BY_ID[c]?.emoji} {CATEGORY_BY_ID[c]?.label}
+            </Link>
+          ))}
+        </div>
+        <h1 className="mt-3 font-display text-3xl font-bold md:text-5xl">{event.title}</h1>
+        <p className="mt-2 text-muted">
+          {formatEventDate(event)}
+          {event.location && ` · ${event.location}`} · {event.videos.length} סרטונים ·{" "}
+          <a href={driveFolderUrl(event.id)} target="_blank" rel="noreferrer" className="text-gold hover:underline">
+            התיקייה ב-Drive ↗
+          </a>
+        </p>
+        {event.description && <p className="mt-3 max-w-3xl text-lg">{event.description}</p>}
+      </header>
+      <Suspense>
+        <VideoPlayer videos={event.videos} emoji={main.emoji} />
+      </Suspense>
+    </article>
+  );
+}

@@ -1,0 +1,11 @@
+{
+  "_example-folder-id": {
+    "title": "כותרת מתוקנת לאירוע",
+    "date": "2024-06-15",
+    "datePrecision": "day",
+    "location": "גבעת זאב",
+    "categories": ["bar-mitzvah"],
+    "description": "תיאור קצר שיופיע בדף האירוע",
+    "hidden": false
+  }
+}
