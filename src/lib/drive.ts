@@ -10,8 +10,53 @@ export function hasDriveCredentials(): boolean {
   return Boolean(process.env.GOOGLE_SERVICE_ACCOUNT_JSON || process.env.GOOGLE_API_KEY);
 }
 
+const VIDEO_EXT = /\.(mp4|m4v|mov|avi|mkv|webm|3gp|mpg|mpeg|wmv)$/i;
+
+/** "10/8/25" (US format used by the public view) → ISO. Times ("10:30 AM") mean today. */
+function parsePublicDate(text: string): string {
+  const m = text.match(/(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);
+  if (!m) return new Date().toISOString();
+  const year = m[3].length === 2 ? 2000 + Number(m[3]) : Number(m[3]);
+  return new Date(Date.UTC(year, Number(m[1]) - 1, Number(m[2]), 12)).toISOString();
+}
+
+const decodeHtml = (s: string) =>
+  s
+    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(Number(n)))
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&amp;/g, "&");
+
 /**
- * Two ways to authenticate:
+ * Lists a folder shared "Anyone with the link" without any Google credentials,
+ * using Drive's public embedded folder view. No sizes; dates are day-precision.
+ */
+async function listPublicChildren(folderId: string) {
+  const res = await fetch(`https://drive.google.com/embeddedfolderview?id=${folderId}`, { cache: "no-store" });
+  if (!res.ok) throw new Error(`Drive folder ${folderId} is not public (${res.status})`);
+  const html = await res.text();
+  const entries = html.split('class="flip-entry"').slice(1);
+  return entries.map((chunk) => {
+    const id = chunk.match(/id="entry-([^"]+)"/)?.[1] ?? "";
+    const isFolder = /href="[^"]*\/folders\//.test(chunk);
+    const isVideo = /alt="Video"/.test(chunk);
+    const name = decodeHtml(chunk.match(/flip-entry-title">([^<]*)/)?.[1]?.trim() ?? "");
+    const modified = parsePublicDate(chunk.match(/flip-entry-last-modified"><div>([^<]*)/)?.[1] ?? "");
+    return {
+      id,
+      name,
+      mimeType: isFolder ? FOLDER_MIME : isVideo || VIDEO_EXT.test(name) ? "video/mp4" : "application/octet-stream",
+      createdTime: modified,
+      modifiedTime: modified,
+    };
+  });
+}
+
+/**
+ * Without credentials the folder is read through its public view (it must be shared "Anyone with the link").
+ * With credentials the official Drive API is used (exact timestamps and sizes, private folders work):
  *  - GOOGLE_SERVICE_ACCOUNT_JSON: a service-account key (raw JSON or base64). Share the Drive folder
  *    with the service account's email as Viewer. Works even when the folder is private.
  *  - GOOGLE_API_KEY: plain API key. Only works when the folder is shared "Anyone with the link".
@@ -56,6 +101,14 @@ async function listChildren(parentId: string, auth: Awaited<ReturnType<typeof au
 
 /** Streams a file's bytes from Drive (used to mirror videos to Vercel Blob). */
 export async function fetchDriveMedia(fileId: string): Promise<Response> {
+  if (!hasDriveCredentials()) {
+    const res = await fetch(`https://drive.usercontent.google.com/download?id=${fileId}&export=download&confirm=t`, {
+      cache: "no-store",
+    });
+    if (!res.ok || !res.body || res.headers.get("content-type")?.includes("text/html"))
+      throw new Error(`Public download ${fileId} failed: ${res.status}`);
+    return res;
+  }
   const auth = await authParams();
   const params = new URLSearchParams({ alt: "media", supportsAllDrives: "true" });
   if (auth.key) params.set("key", auth.key);
@@ -69,11 +122,12 @@ export async function fetchDriveMedia(fileId: string): Promise<Response> {
  * are flattened into their top-level event.
  */
 export async function fetchDriveFolders(rootId = ROOT_FOLDER_ID): Promise<DriveFolder[]> {
-  const auth = await authParams();
-  const top = (await listChildren(rootId, auth)).filter((f) => f.mimeType === FOLDER_MIME);
+  const auth = hasDriveCredentials() ? await authParams() : null;
+  const list = (id: string) => (auth ? listChildren(id, auth) : listPublicChildren(id));
+  const top = (await list(rootId)).filter((f) => f.mimeType === FOLDER_MIME);
 
   async function collectVideos(folderId: string): Promise<DriveVideo[]> {
-    const children = await listChildren(folderId, auth);
+    const children = await list(folderId);
     const videos = children.filter((f) => f.mimeType.startsWith("video/"));
     const nested = await Promise.all(children.filter((f) => f.mimeType === FOLDER_MIME).map((f) => collectVideos(f.id)));
     return [...videos, ...nested.flat()];

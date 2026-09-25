@@ -57,6 +57,15 @@ export function mergeEvents(
   now = new Date().toISOString(),
 ): { events: EventItem[]; report: SyncReport } {
   const previous = new Map(existing.map((e) => [e.id, e]));
+  // The public view has no sizes and only day-precision dates: keep what we already know about each video.
+  if (source === "public") {
+    const known = new Map(existing.flatMap((e) => e.videos).map((v) => [v.id, v]));
+    for (const f of folders)
+      for (const v of f.videos) {
+        const prev = known.get(v.id);
+        if (prev) Object.assign(v, { size: String(prev.size), modifiedTime: prev.modifiedTime });
+      }
+  }
   const firstRun = existing.length === 0;
   const report: SyncReport = { at: now, source, total: 0, newEvents: [], newVideos: [], removedEvents: [] };
 

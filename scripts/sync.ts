@@ -25,18 +25,14 @@ async function main() {
   if (useSnapshot) {
     folders = JSON.parse(readFileSync(join(DATA, "drive-snapshot.json"), "utf8")).folders;
   } else {
-    if (!hasDriveCredentials()) {
-      console.error("No Google credentials. Set GOOGLE_SERVICE_ACCOUNT_JSON or GOOGLE_API_KEY in .env.local, or use --snapshot.");
-      process.exit(1);
-    }
-    console.log(`Reading Drive folder ${ROOT_FOLDER_ID} ...`);
+    console.log(`Reading Drive folder ${ROOT_FOLDER_ID} (${hasDriveCredentials() ? "Drive API" : "public link"}) ...`);
     folders = await fetchDriveFolders();
   }
 
   const existing: EventItem[] = getRedis()
     ? await loadEvents()
     : JSON.parse(readFileSync(join(DATA, "events.json"), "utf8"));
-  const { events, report } = mergeEvents(folders, existing, overrides, useSnapshot ? "snapshot" : "drive");
+  const { events, report } = mergeEvents(folders, existing, overrides, useSnapshot ? "snapshot" : hasDriveCredentials() ? "drive" : "public");
 
   console.log(`\n${report.total} events, ${events.reduce((n, e) => n + e.videos.length, 0)} videos`);
   for (const e of report.newEvents) console.log(`  + new event: ${e.title}`);

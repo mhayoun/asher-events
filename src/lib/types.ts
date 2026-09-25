@@ -41,7 +41,7 @@ export interface EventItem {
 
 export interface SyncReport {
   at: string;
-  source: "drive" | "snapshot";
+  source: "drive" | "public" | "snapshot";
   total: number;
   newEvents: { id: string; title: string }[];
   newVideos: { eventId: string; eventTitle: string; title: string }[];

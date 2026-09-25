@@ -16,11 +16,10 @@ export const maxDuration = 300; // Hobby-plan maximum
 export async function GET(request: Request) {
   if (!isAuthorized(request))
     return Response.json({ error: "unauthorized" }, { status: 401 });
-  if (!hasDriveCredentials()) return Response.json({ error: "missing Google credentials" }, { status: 500 });
   if (!getRedis()) return Response.json({ error: "Redis is not configured" }, { status: 500 });
 
   const [folders, existing] = await Promise.all([fetchDriveFolders(), loadEvents()]);
-  const { events, report } = mergeEvents(folders, existing, overrides, "drive");
+  const { events, report } = mergeEvents(folders, existing, overrides, hasDriveCredentials() ? "drive" : "public");
 
   if (new URL(request.url).searchParams.get("dry")) return Response.json({ dryRun: true, report });
 
