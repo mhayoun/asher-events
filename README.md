@@ -2,11 +2,10 @@
 
 Video gallery of a music teacher's events (בר מצוה, ברית מילה, שבע ברכות, …), built from a Google Drive folder.
 
-- **Next.js 16** (App Router, RTL Hebrew) on **Vercel**
-- **Upstash Redis** (Vercel Marketplace) stores the event list
-- **Daily sync**: Vercel Cron → `/api/cron/sync` reads Drive, adds new events/videos, refreshes the site
-- Search by text (event title *and* song/video names, Hebrew-spelling tolerant), category, year, or date range — all shareable via the URL
-- Videos play from Drive, or natively from **Vercel Blob** if the optional mirror is on
+- **Next.js 16** (App Router, RTL Hebrew) hosted on **Vercel**, code on **GitHub**
+- **Daily sync**: a GitHub Action reads the Drive folder every morning, writes new events to `data/`, commits, and the push makes Vercel redeploy. No database and no secrets needed while the folder is shared "Anyone with the link".
+- Search by text (event title *and* song/video names, Hebrew-spelling tolerant), category, year, or date range, all shareable via the URL
+- Videos play from Drive (or natively from **Vercel Blob** if the optional mirror is on)
 
 ## How the Drive folder maps to the site
 
@@ -29,37 +28,31 @@ So the teacher's workflow is: **create a folder in Drive, drop the videos in.** 
 
 ```bash
 npm install
-cp .env.example .env.local     # fill in what you have; the site works with none of it
 npm run dev                    # http://localhost:3000
 ```
-
-Without Redis the site reads `data/events.json` (committed).
 
 ### Check Drive for new events from your machine
 
 ```bash
 npm run sync:check             # dry run: lists new events / videos, changes nothing
-npm run sync                   # Drive → Redis + data/events.json (+ Blob copies, + refresh live site)
-npm run sync -- --snapshot     # rebuild data/events.json from data/drive-snapshot.json, no credentials needed
+npm run sync                   # Drive -> data/events.json (review with git diff)
+npm run sync:publish           # sync, then commit + push data/ -> Vercel redeploys
+npm run sync -- --snapshot     # rebuild data/events.json from data/drive-snapshot.json, offline
 ```
 
-## Deploy
+## Hosting
 
-1. **Drive access**
-   - For visitors to play videos, share the Drive `events` folder as **Anyone with the link → Viewer**.
-   - For the sync: either create an API key (Google Cloud → APIs & Services → enable *Google Drive API* → Credentials → API key) → `GOOGLE_API_KEY`,
-     or a service account key → `GOOGLE_SERVICE_ACCOUNT_JSON`, and share the folder with its `client_email`.
-2. **GitHub**: push this repo.
-3. **Vercel**: import the repo, then in the project:
-   - Storage → Marketplace → **Upstash Redis** → connect (adds `KV_REST_API_URL` / `KV_REST_API_TOKEN`)
-   - *(optional)* Storage → **Blob** → connect (adds `BLOB_READ_WRITE_TOKEN`) for native video playback
-   - Environment variables: `GOOGLE_API_KEY` or `GOOGLE_SERVICE_ACCOUNT_JSON`, `CRON_SECRET` (random string)
-4. Deploy. `vercel.json` schedules the sync daily at 04:00 UTC. To run it right away:
-   ```bash
-   curl -H "Authorization: Bearer $CRON_SECRET" https://<your-site>/api/cron/sync        # add ?dry=1 to preview
-   ```
+- **GitHub**: `.github/workflows/daily-sync.yml` runs at 04:00 UTC (07:00 Israel time in summer). To check right away, open the repo on GitHub, go to **Actions**, choose **Daily Drive sync**, then click **Run workflow**.
+- **Vercel**: the project is connected to the GitHub repo, so every push to `main`, including the bot's sync commits, deploys to production.
+- **Drive**: the `events` folder must stay shared as **Anyone with the link: Viewer**, both for the sync and so visitors can play videos.
 
-`.github/workflows/daily-sync.yml` is an optional second scheduler (GitHub Actions) that runs `npm run sync`. It's handy for the first Blob mirror of large files.
+### Optional extras (not needed)
+
+| Want | Add |
+|---|---|
+| Official Drive API (exact file sizes and times, private folder) | `GOOGLE_API_KEY` or `GOOGLE_SERVICE_ACCOUNT_JSON` as GitHub Actions secrets |
+| Instant updates without a redeploy | Redis (`KV_REST_API_URL` / `KV_REST_API_TOKEN`) in Vercel, then `/api/cron/sync` can run as a Vercel Cron |
+| Native video player instead of Drive's | Vercel Blob (`BLOB_READ_WRITE_TOKEN`): the sync copies each video there |
 
 ## Endpoints
 
@@ -68,5 +61,5 @@ npm run sync -- --snapshot     # rebuild data/events.json from data/drive-snapsh
 | `/` | Gallery with search and filters (`?q=&cat=&from=&to=&sort=old`) |
 | `/events/[folderId]?v=[videoId]` | Event page with player and playlist |
 | `/api/events` | JSON of all events and the last sync report |
-| `/api/cron/sync` | Daily sync (Bearer `CRON_SECRET`) |
+| `/api/cron/sync` | Sync into Redis, only if Redis is configured (Bearer `CRON_SECRET`) |
 | `/api/revalidate` | POST, refreshes pages after a local sync (Bearer `CRON_SECRET`) |

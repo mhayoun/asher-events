@@ -15,7 +15,11 @@ const VIDEO_EXT = /\.(mp4|m4v|mov|avi|mkv|webm|3gp|mpg|mpeg|wmv)$/i;
 /** "10/8/25" (US format used by the public view) → ISO. Times ("10:30 AM") mean today. */
 function parsePublicDate(text: string): string {
   const m = text.match(/(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);
-  if (!m) return new Date().toISOString();
+  if (!m) {
+    // A time of day means "modified today"; keep it at day precision so repeated syncs produce the same output.
+    const now = new Date();
+    return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 12)).toISOString();
+  }
   const year = m[3].length === 2 ? 2000 + Number(m[3]) : Number(m[3]);
   return new Date(Date.UTC(year, Number(m[1]) - 1, Number(m[2]), 12)).toISOString();
 }

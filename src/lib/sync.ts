@@ -86,7 +86,7 @@ export function mergeEvents(
       }
       return { ...built, addedAt: prev?.addedAt ?? (firstRun ? folder.createdTime : now) };
     })
-    .sort((a, b) => b.date.localeCompare(a.date));
+    .sort((a, b) => b.date.localeCompare(a.date) || a.id.localeCompare(b.id));
 
   const current = new Set(events.map((e) => e.id));
   report.removedEvents = existing.filter((e) => !current.has(e.id)).map((e) => ({ id: e.id, title: e.title }));

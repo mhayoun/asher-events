@@ -1,17 +1,22 @@
-# Optional backup for the Vercel Cron job: runs the same sync from GitHub once a day.
-# Useful when mirroring large videos to Blob (no 5-minute function limit here).
-# Add the secrets under Settings → Secrets and variables → Actions.
+# Checks the Google Drive "events" folder every morning.
+# New events/videos are written to data/ and committed; the push makes Vercel redeploy the site.
+# No secrets needed while the Drive folder is shared "Anyone with the link".
 name: Daily Drive sync
 
 on:
   schedule:
-    - cron: "30 4 * * *"
-  workflow_dispatch:
+    - cron: "0 4 * * *" # 04:00 UTC = 07:00 Israel (summer)
+  workflow_dispatch: # "Run workflow" button in the Actions tab
+
+permissions:
+  contents: write
+
+concurrency: drive-sync
 
 jobs:
   sync:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -21,10 +26,17 @@ jobs:
       - run: npm ci
       - run: npm run sync
         env:
-          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          # Optional: use the official Drive API instead of the public folder view
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
-          KV_REST_API_URL: ${{ secrets.KV_REST_API_URL }}
-          KV_REST_API_TOKEN: ${{ secrets.KV_REST_API_TOKEN }}
-          BLOB_READ_WRITE_TOKEN: ${{ secrets.BLOB_READ_WRITE_TOKEN }}
-          CRON_SECRET: ${{ secrets.CRON_SECRET }}
-          SITE_URL: ${{ vars.SITE_URL }}
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+      - name: Commit changes
+        run: |
+          git add data
+          if git diff --cached --quiet; then
+            echo "No new events"
+          else
+            git config user.name "events-sync[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "Sync events from Google Drive"
+            git push
+          fi

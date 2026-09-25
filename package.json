@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "sync": "node --env-file-if-exists=.env.local --import tsx scripts/sync.ts",
-    "sync:check": "npm run sync -- --dry-run"
+    "sync:check": "npm run sync -- --dry-run",
+    "sync:publish": "npm run sync && git add data && (git diff --cached --quiet && echo 'Nothing to publish' || (git commit -m 'Sync events from Google Drive' && git push))"
   },
   "dependencies": {
     "@upstash/redis": "^1.39.0",
