@@ -35,21 +35,20 @@ export default async function EventPage({ params }: PageProps<"/events/[id]">) {
 
   return (
     <article className="mx-auto max-w-7xl px-4 py-8">
-      <Link href="/" className="text-sm text-muted hover:text-gold">
-        → כל האירועים
-      </Link>
-      <header className="mb-6 mt-3">
-        <div className="flex flex-wrap gap-2">
-          {event.categories.map((c) => (
-            <Link
-              key={c}
-              href={`/?cat=${encodeURIComponent(c)}`}
-              className="rounded-full border border-line bg-surface px-3 py-1 text-sm hover:border-gold"
-            >
+      <nav aria-label="breadcrumb" className="flex flex-wrap items-center gap-2 text-sm text-muted">
+        <Link href="/" className="hover:text-gold">
+          כל האירועים
+        </Link>
+        {event.categories.map((c) => (
+          <span key={c} className="flex items-center gap-2">
+            <span aria-hidden>‹</span>
+            <Link href={`/?cat=${encodeURIComponent(c)}#events`} className="hover:text-gold">
               {categoryInfo(c).emoji} {categoryInfo(c).label}
             </Link>
-          ))}
-        </div>
+          </span>
+        ))}
+      </nav>
+      <header className="mb-6 mt-3">
         <h1 className="mt-3 font-display text-3xl font-bold md:text-5xl">{event.title}</h1>
         <p className="mt-2 text-muted">
           {formatEventDate(event)}

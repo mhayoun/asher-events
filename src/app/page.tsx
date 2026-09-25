@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { CategoryGrid } from "@/components/CategoryGrid";
 import { EventExplorer } from "@/components/EventExplorer";
 import { getPublicEvents } from "@/lib/events";
 
@@ -33,7 +34,7 @@ export default async function Home() {
               [events.length, "אירועים"],
               [media.length - audio, "סרטונים"],
               ...(audio ? [[audio, "הקלטות"]] : []),
-              [categories, "סוגי אירועים"],
+              [categories, "קטגוריות"],
               [span, "שנים"],
             ].map(([value, label]) => (
               <div key={label}>
@@ -46,6 +47,7 @@ export default async function Home() {
           </dl>
         </div>
       </section>
+      <CategoryGrid events={events} />
       <Suspense>
         <EventExplorer events={events} />
       </Suspense>

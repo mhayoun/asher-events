@@ -11,6 +11,8 @@ export interface DriveVideo {
 export interface DriveFolder {
   id: string;
   name: string;
+  /** Name of the category folder the event sits in. */
+  category?: string;
   createdTime: string;
   modifiedTime: string;
   videos: DriveVideo[];
@@ -31,7 +33,7 @@ export interface EventVideo {
 export interface EventItem {
   id: string; // Drive folder id
   title: string;
-  categories: string[]; // category ids, see categories.ts
+  categories: string[]; // category folder name(s) in Drive; see categories.ts for icons
   date: string; // YYYY-MM-DD (YYYY-01-01 when only the year is known)
   datePrecision: "day" | "year";
   location?: string;

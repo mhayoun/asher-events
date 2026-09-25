@@ -3,7 +3,7 @@
   "id": "1PwcZM3yfMVUs_KalKZszqj5HuwVtKqJI",
   "title": "ברית מילה רמות 2024",
   "categories": [
-   "brit"
+   "ברית מילה"
   ],
   "date": "2024-12-30",
   "datePrecision": "day",
@@ -21,8 +21,7 @@
   "id": "1F8dqzD4-sFZYYsTltmUcLUE6Wn-Qv8r4",
   "title": "בר מצווה של תלמיד - בית אהרון 2024",
   "categories": [
-   "bar-mitzvah",
-   "students"
+   "בר מצוה"
   ],
   "date": "2024-08-30",
   "datePrecision": "day",
@@ -46,9 +45,7 @@
   "id": "1INK7kwYcQk8Git-ehiOAmmvaPmokF1oD",
   "title": "אשר חיון ואבי בריז זיץ במושב אלמוג",
   "categories": [
-   "avi-briz",
-   "kumzitz",
-   "students"
+   "אירועים"
   ],
   "date": "2024-08-29",
   "datePrecision": "day",
@@ -84,8 +81,7 @@
   "id": "1nj8cpe5yuCXVpelfe7ftu8z_4O5wSTCF",
   "title": "אשר חיון ואבי בריז זיץ קיץ במלון שלום 2024",
   "categories": [
-   "avi-briz",
-   "kumzitz"
+   "אירועים"
   ],
   "date": "2024-08-29",
   "datePrecision": "day",
@@ -121,7 +117,7 @@
   "id": "10Qxdox0PWaUAN9RTWPLzeaI7aQ2so6mg",
   "title": "שבע ברכות גבעת זאב",
   "categories": [
-   "sheva-brachot"
+   "שבע ברכות"
   ],
   "date": "2024-08-20",
   "datePrecision": "day",
@@ -157,9 +153,7 @@
   "id": "1_eiw_DyCcQPt29B5hW1nyBNPTAfZQ2_u",
   "title": "בר מצוה 2024 גבעת זעב",
   "categories": [
-   "bar-mitzvah",
-   "students",
-   "saxophone"
+   "בר מצוה"
   ],
   "date": "2024-07-09",
   "datePrecision": "day",
@@ -189,7 +183,7 @@
   "id": "14ZiNEWlwT3R02GL9guFnUhFMXC0N0d-i",
   "title": "הכנסת ספר תורה",
   "categories": [
-   "sefer-torah"
+   "הכנסת ספר תורה"
   ],
   "date": "2024-07-02",
   "datePrecision": "day",
@@ -219,7 +213,7 @@
   "id": "1wl5qFQb3N6tdlaWkyWTn0uBEtcs_a-OM",
   "title": "מסיבת חומש תלמוד תורה מענה שמחה",
   "categories": [
-   "chumash"
+   "מקהלת ילדים"
   ],
   "date": "2024-07-01",
   "datePrecision": "day",
@@ -237,8 +231,7 @@
   "id": "1fWDY4PArJbCkTFwi6Ug3y9K5i2cPBI_B",
   "title": "מסיבת חנוכה בישיבת תורה מציון גבעת זאב עם התלמיד אברהם קס",
   "categories": [
-   "chanukah",
-   "students"
+   "מקהלת ילדים"
   ],
   "date": "2024-06-20",
   "datePrecision": "day",
@@ -256,7 +249,7 @@
   "id": "1p6y-GrBdXHvz-FI5SOBx95QVTTkPdsnS",
   "title": "מפוחית",
   "categories": [
-   "מפוחית"
+   "כלי נגינה"
   ],
   "date": "2024-05-02",
   "datePrecision": "day",
@@ -274,7 +267,7 @@
   "id": "1C6BfRcwRYRS_jc2DIrp99rManDAU2DWr",
   "title": "סקסופון",
   "categories": [
-   "saxophone"
+   "כלי נגינה"
   ],
   "date": "2024-04-24",
   "datePrecision": "day",
@@ -293,9 +286,7 @@
   "id": "1N5DBkWr15ni_6eu0nXsxJ-p10V4wD2km",
   "title": "סוכות 2024",
   "categories": [
-   "sukkot",
-   "kumzitz",
-   "students"
+   "תזמורת ילדים"
   ],
   "date": "2024-01-01",
   "datePrecision": "year",
@@ -313,7 +304,7 @@
   "id": "1S7hWC1ZA2NAoQQ3LsdegOhIxgZ6CHjMG",
   "title": "אירוסין",
   "categories": [
-   "erusin"
+   "אירוסין"
   ],
   "date": "2024-01-01",
   "datePrecision": "year",
@@ -337,7 +328,7 @@
   "id": "1ulmJTKn26zXiCG71xT_1Hh2Y5pPofB1Q",
   "title": "ברית מילה רמות 2023",
   "categories": [
-   "brit"
+   "ברית מילה"
   ],
   "date": "2023-01-01",
   "datePrecision": "year",
@@ -379,10 +370,7 @@
   "id": "1lNTyKw0joap3R5EWCqSu97EuRSUPb8IE",
   "title": "ילד הפלא דוד מחמלי",
   "categories": [
-   "wedding",
-   "bar-mitzvah",
-   "sukkot",
-   "students"
+   "ילד הפלא"
   ],
   "date": "2022-01-01",
   "datePrecision": "year",
@@ -412,7 +400,7 @@
   "id": "1NzpzTpWZRUCG1z1W6OEYPDc5LecOTLKH",
   "title": "נגינה על סנטור באולפן",
   "categories": [
-   "studio"
+   "כלי נגינה"
   ],
   "date": "2022-01-01",
   "datePrecision": "year",
@@ -430,7 +418,7 @@
   "id": "1WgYJUhYvrZlwwqIfD2TIYlu5uBQasPV5",
   "title": "סיום השס בגבעת זאב 2022",
   "categories": [
-   "siyum"
+   "אירועים"
   ],
   "date": "2022-01-01",
   "datePrecision": "year",
@@ -448,7 +436,7 @@
   "id": "1V-q7VioilKW6W3NQkPtKwG03gzMJplbP",
   "title": "סוכות 2021",
   "categories": [
-   "sukkot"
+   "תזמורת ילדים"
   ],
   "date": "2021-01-01",
   "datePrecision": "year",

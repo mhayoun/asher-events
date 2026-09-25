@@ -92,7 +92,7 @@ export function EventExplorer({ events }: { events: EventItem[] }) {
     update({ cats: f.cats.includes(id) ? f.cats.filter((c) => c !== id) : [...f.cats, id] });
 
   return (
-    <section className="mx-auto max-w-7xl px-4 pb-16">
+    <section id="events" className="mx-auto max-w-7xl scroll-mt-16 px-4 pb-16 pt-6">
       {/* Search & date filters */}
       <div className="z-20 -mx-4 md:sticky md:top-[61px] border-b border-line bg-bg/95 px-4 py-4">
         <div className="flex flex-col gap-3 md:flex-row md:items-end">

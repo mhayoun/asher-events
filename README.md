@@ -13,23 +13,29 @@ Video gallery of a music teacher's events (בר מצוה, ברית מילה, ש�
 ## How the Drive folder maps to the site
 
 ```
-events/                         ← DRIVE_ROOT_FOLDER_ID
-├── בר מצוה 2024 גבעת זעב/       ← one event (folder name = title)
-│   ├── סקסופון.mp4             ← one video (file name = song title)
-│   └── ילדים שרים.mp4
-└── שבע ברכות גבעת זאב/
+events/                              ← DRIVE_ROOT_FOLDER_ID
+├── בר מצוה/                          ← category (folder name = category name on the site)
+│   ├── בר מצוה 2024 גבעת זעב/        ← event (folder name = title)
+│   │   ├── סקסופון.mp4              ← video (file name = song title)
+│   │   └── ילדים שרים.mp4
+│   └── בר מצווה של תלמיד 2024/
+├── כלי נגינה/
+│   └── סקסופון/
+│       └── והיא שעמדה.mp3           ← audio recordings work too
+└── הכנסת ספר תורה/
+    └── רקודים 01.mp4                ← media directly in a category = one event named like the category
 ```
 
-- **Category**: keywords in the folder and file names (`src/lib/categories.ts`). An event can have several.
-  If nothing matches, a **new category is created from the folder title**: years and numbers are dropped and the
-  title is cut before "who / where" words (`משפחת`, `של`, `עם`, `באולם`, a place like `במירון`, …), so
-  `יום הולדת 40 משפחת כהן 2026` → **יום הולדת**. Later folders containing the same words join that category.
-  To give it an icon or merge it with others, add it to `CATEGORIES`, or fix a single event in `data/overrides.json`.
-- **Date**: a year in the folder name (e.g. `סוכות 2024`), otherwise the earliest video's timestamp.
-- **Corrections**: `data/overrides.json`, keyed by folder id — set `title`, `date`, `datePrecision`, `location`, `description`, `categories`, or `hidden`.
-- Empty folders are skipped until they contain a video.
+- **Category** = the folder directly under the root. New category folders appear on the site automatically;
+  their icon comes from keywords in `src/lib/categories.ts` (🎵 when nothing matches).
+- **Event** = a folder inside a category. Its videos/recordings, including those in deeper sub-folders, are its items.
+- **Date**: a year in the event folder name (e.g. `סוכות 2024`), otherwise the earliest file's timestamp.
+- **Moving** an event folder to another category keeps its page link and its "חדש" date (Drive ids don't change).
+- **Corrections**: `data/overrides.json`, keyed by event folder id: set `title`, `date`, `datePrecision`, `location`, `description`, or `hidden`.
+- Empty folders are skipped until they contain a video or recording. Files placed directly in the root are ignored.
 
-So the teacher's workflow is: **create a folder in Drive, drop the videos in.** It shows up on the site the next morning, marked "חדש" for 30 days.
+So the teacher's workflow is: **open (or create) a category folder, create an event folder in it, drop the files in.**
+It shows up within the hour, or right away with the "עדכון מהדרייב" button, marked "חדש" for 30 days.
 
 ## Run locally
 
