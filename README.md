@@ -5,6 +5,7 @@
 Video gallery of a music teacher's events (בר מצוה, ברית מילה, שבע ברכות, …), built from a Google Drive folder.
 
 - **Next.js 16** (App Router, RTL Hebrew) hosted on **Vercel**, code on **GitHub**
+- **Live from Drive**: pages merge the saved events with the Drive folder (listing cached 1 h), so uploads show up within the hour, or **immediately with the "עדכון מהדרייב" button** in the header (password: `SYNC_PASSWORD` env var)
 - **Daily sync**: a GitHub Action reads the Drive folder every morning, writes new events to `data/`, commits, and the push makes Vercel redeploy. No database and no secrets needed while the folder is shared "Anyone with the link".
 - Search by text (event title *and* song/video names, Hebrew-spelling tolerant), category, year, or date range, all shareable via the URL
 - Videos play from Drive (or natively from **Vercel Blob** if the optional mirror is on)
@@ -66,6 +67,7 @@ npm run sync -- --snapshot     # rebuild data/events.json from data/drive-snapsh
 |---|---|
 | `/` | Gallery with search and filters (`?q=&cat=&from=&to=&sort=old`) |
 | `/events/[folderId]?v=[videoId]` | Event page with player and playlist |
+| `/api/sync` | POST `{ password }`: the header button. Checks Drive now and expires the cached listing |
 | `/api/events` | JSON of all events and the last sync report |
 | `/api/cron/sync` | Sync into Redis, only if Redis is configured (Bearer `CRON_SECRET`) |
 | `/api/revalidate` | POST, refreshes pages after a local sync (Bearer `CRON_SECRET`) |

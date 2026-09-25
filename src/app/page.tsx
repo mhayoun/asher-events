@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { EventExplorer } from "@/components/EventExplorer";
-import { getPublicEvents } from "@/lib/store";
+import { getPublicEvents } from "@/lib/events";
 
 // Fresh data is pushed by the daily sync (revalidatePath); this is only a safety net.
 export const revalidate = 3600;

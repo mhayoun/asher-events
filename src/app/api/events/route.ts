@@ -1,4 +1,5 @@
-import { getPublicEvents, loadLastSync } from "@/lib/store";
+import { getPublicEvents } from "@/lib/events";
+import { loadLastSync } from "@/lib/store";
 
 export const revalidate = 3600;
 

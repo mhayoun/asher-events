@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Heebo, Frank_Ruhl_Libre } from "next/font/google";
 import Link from "next/link";
+import { SyncButton } from "@/components/SyncButton";
 import "./globals.css";
 
 const heebo = Heebo({ variable: "--font-heebo", subsets: ["hebrew", "latin"] });
@@ -21,7 +22,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               <span className="grid h-9 w-9 place-items-center rounded-full bg-gold text-bg">♪</span>
               אשר חיון
             </Link>
-            <span className="hidden text-sm text-muted sm:inline">מוזיקה לאירועים · הוראת נגינה</span>
+            <div className="flex items-center gap-4">
+              <span className="hidden text-sm text-muted sm:inline">מוזיקה לאירועים · הוראת נגינה</span>
+              <SyncButton />
+            </div>
           </div>
         </header>
         <main className="flex-1">{children}</main>

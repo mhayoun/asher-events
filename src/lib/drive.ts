@@ -6,6 +6,13 @@ const FOLDER_MIME = "application/vnd.google-apps.folder";
 
 export const ROOT_FOLDER_ID = process.env.DRIVE_ROOT_FOLDER_ID || "1z1LJJCZUkLvmkj-Rg001URbcc7Om9-sU";
 
+/**
+ * How folder listings are fetched. By default always fresh; the site passes a Next.js cache
+ * setting ({ revalidate, tags }) so pages reuse the listing and the sync button can expire it by tag.
+ */
+export type ListingCache = { revalidate: number; tags: string[] } | undefined;
+const fetchOptions = (cache: ListingCache): RequestInit => (cache ? { next: cache } : { cache: "no-store" });
+
 export function hasDriveCredentials(): boolean {
   return Boolean(process.env.GOOGLE_SERVICE_ACCOUNT_JSON || process.env.GOOGLE_API_KEY);
 }
@@ -40,8 +47,8 @@ const decodeHtml = (s: string) =>
  * Lists a folder shared "Anyone with the link" without any Google credentials,
  * using Drive's public embedded folder view. No sizes; dates are day-precision.
  */
-async function listPublicChildren(folderId: string) {
-  const res = await fetch(`https://drive.google.com/embeddedfolderview?id=${folderId}`, { cache: "no-store" });
+async function listPublicChildren(folderId: string, cache: ListingCache) {
+  const res = await fetch(`https://drive.google.com/embeddedfolderview?id=${folderId}`, fetchOptions(cache));
   if (!res.ok) throw new Error(`Drive folder ${folderId} is not public (${res.status})`);
   const html = await res.text();
   const entries = html.split('class="flip-entry"').slice(1);
@@ -91,7 +98,7 @@ async function authParams(): Promise<{ headers: Record<string, string>; key?: st
   throw new Error("Missing GOOGLE_SERVICE_ACCOUNT_JSON or GOOGLE_API_KEY");
 }
 
-async function listChildren(parentId: string, auth: Awaited<ReturnType<typeof authParams>>) {
+async function listChildren(parentId: string, auth: Awaited<ReturnType<typeof authParams>>, cache: ListingCache) {
   const files: (DriveVideo & { mimeType: string })[] = [];
   let pageToken: string | undefined;
   do {
@@ -104,7 +111,7 @@ async function listChildren(parentId: string, auth: Awaited<ReturnType<typeof au
     });
     if (pageToken) params.set("pageToken", pageToken);
     if (auth.key) params.set("key", auth.key);
-    const res = await fetch(`${API}?${params}`, { headers: auth.headers, cache: "no-store" });
+    const res = await fetch(`${API}?${params}`, { headers: auth.headers, ...fetchOptions(cache) });
     if (!res.ok) throw new Error(`Drive API ${res.status}: ${await res.text()}`);
     const body = await res.json();
     files.push(...body.files);
@@ -135,9 +142,9 @@ export async function fetchDriveMedia(fileId: string): Promise<Response> {
  * Every direct sub-folder of the root is an event. Its videos and audio recordings (also those in
  * nested sub-folders) are its media items, kept in `videos` for historical reasons.
  */
-export async function fetchDriveFolders(rootId = ROOT_FOLDER_ID): Promise<DriveFolder[]> {
+export async function fetchDriveFolders(rootId = ROOT_FOLDER_ID, cache?: ListingCache): Promise<DriveFolder[]> {
   const auth = hasDriveCredentials() ? await authParams() : null;
-  const list = (id: string) => (auth ? listChildren(id, auth) : listPublicChildren(id));
+  const list = (id: string) => (auth ? listChildren(id, auth, cache) : listPublicChildren(id, cache));
   const top = (await list(rootId)).filter((f) => f.mimeType === FOLDER_MIME);
 
   async function collectVideos(folderId: string): Promise<DriveVideo[]> {

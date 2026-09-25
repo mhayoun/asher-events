@@ -5,7 +5,7 @@ import { Suspense } from "react";
 import { VideoPlayer } from "@/components/VideoPlayer";
 import { categoryInfo } from "@/lib/categories";
 import { driveFolderUrl, formatEventDate, mediaCount, thumbnailUrl } from "@/lib/format";
-import { getPublicEvents } from "@/lib/store";
+import { getPublicEvents } from "@/lib/events";
 
 export const revalidate = 3600;
 

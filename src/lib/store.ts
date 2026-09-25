@@ -45,7 +45,3 @@ export async function saveToRedis(events: EventItem[], report: SyncReport): Prom
   await redis.mset({ [EVENTS_KEY]: events, [REPORT_KEY]: report });
   return true;
 }
-
-export async function getPublicEvents(): Promise<EventItem[]> {
-  return (await loadEvents()).filter((e) => !e.hidden);
-}
