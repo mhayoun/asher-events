@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { categoryInfo, normalize, orderCategories } from "@/lib/categories";
+import { categoryInfo, normalize, OTHER, orderCategories } from "@/lib/categories";
 import { formatEventDate, isNew, mediaCount } from "@/lib/format";
 import type { EventItem } from "@/lib/types";
 import { Thumbnail } from "./Thumbnail";
@@ -216,7 +216,7 @@ export function EventExplorer({ events }: { events: EventItem[] }) {
 }
 
 function EventCard({ event: e }: { event: EventItem }) {
-  const main = categoryInfo(e.categories[0] ?? "other");
+  const main = categoryInfo(e.categories[0] ?? OTHER);
   return (
     <Link
       href={`/events/${e.id}`}

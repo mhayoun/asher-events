@@ -3,8 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { VideoPlayer } from "@/components/VideoPlayer";
-import { categoryInfo } from "@/lib/categories";
-import { driveFolderUrl, formatEventDate, mediaCount, thumbnailUrl } from "@/lib/format";
+import { categoryInfo, OTHER } from "@/lib/categories";
+import { driveFileUrl, driveFolderUrl, formatEventDate, mediaCount, thumbnailUrl } from "@/lib/format";
 import { getPublicEvents } from "@/lib/events";
 
 export const revalidate = 3600;
@@ -31,7 +31,9 @@ export async function generateMetadata({ params }: PageProps<"/events/[id]">): P
 export default async function EventPage({ params }: PageProps<"/events/[id]">) {
   const event = await getEvent((await params).id);
   if (!event) notFound();
-  const main = categoryInfo(event.categories[0] ?? "other");
+  const main = categoryInfo(event.categories[0] ?? OTHER);
+  // A file placed directly in a category folder is an event of its own (see fetchDriveFolders).
+  const singleFile = event.videos.length === 1 && event.videos[0].id === event.id;
 
   return (
     <article className="mx-auto max-w-7xl px-4 py-8">
@@ -53,9 +55,15 @@ export default async function EventPage({ params }: PageProps<"/events/[id]">) {
         <p className="mt-2 text-muted">
           {formatEventDate(event)}
           {event.location && ` · ${event.location}`} · {mediaCount(event.videos)} ·{" "}
-          <a href={driveFolderUrl(event.id)} target="_blank" rel="noreferrer" className="text-gold hover:underline">
-            התיקייה ב-Drive ↗
-          </a>
+          {singleFile ? (
+            <a href={driveFileUrl(event.id)} target="_blank" rel="noreferrer" className="text-gold hover:underline">
+              הקובץ ב-Drive ↗
+            </a>
+          ) : (
+            <a href={driveFolderUrl(event.id)} target="_blank" rel="noreferrer" className="text-gold hover:underline">
+              התיקייה ב-Drive ↗
+            </a>
+          )}
         </p>
         {event.description && <p className="mt-3 max-w-3xl text-lg">{event.description}</p>}
       </header>

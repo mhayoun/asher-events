@@ -78,6 +78,9 @@ export function mergeEvents(
       }
   }
   const firstRun = existing.length === 0;
+  // When files are regrouped (e.g. loose files that became events of their own), the new event keeps
+  // the "added" date of the event its files came from instead of showing up as brand new.
+  const addedByVideo = new Map(existing.flatMap((e) => e.videos.map((v) => [v.id, e.addedAt] as const)));
   const report: SyncReport = { at: now, source, total: 0, newEvents: [], newVideos: [], removedEvents: [], removedVideos: [] };
 
   const events = folders
@@ -88,8 +91,9 @@ export function mergeEvents(
       // keep Blob copies made by earlier runs
       const mirrored = new Map(prev?.videos.filter((v) => v.url).map((v) => [v.id, v.url]));
       for (const v of built.videos) if (mirrored.has(v.id)) v.url = mirrored.get(v.id);
+      const inherited = built.videos.map((v) => addedByVideo.get(v.id)).find(Boolean);
       if (!prev) {
-        if (!firstRun) report.newEvents.push({ id: built.id, title: built.title });
+        if (!firstRun && !inherited) report.newEvents.push({ id: built.id, title: built.title });
       } else {
         const known = new Set(prev.videos.map((v) => v.id));
         for (const v of built.videos)
@@ -98,12 +102,16 @@ export function mergeEvents(
         for (const v of prev.videos)
           if (!still.has(v.id)) report.removedVideos.push({ eventId: built.id, eventTitle: built.title, title: v.title });
       }
-      return { ...built, addedAt: prev?.addedAt ?? (firstRun ? folder.createdTime : now) };
+      return { ...built, addedAt: prev?.addedAt ?? inherited ?? (firstRun ? folder.createdTime : now) };
     })
     .sort((a, b) => b.date.localeCompare(a.date) || a.id.localeCompare(b.id));
 
   const current = new Set(events.map((e) => e.id));
-  report.removedEvents = existing.filter((e) => !current.has(e.id)).map((e) => ({ id: e.id, title: e.title }));
+  // An event whose files all live on in other events was regrouped, not deleted.
+  const stillShown = new Set(events.flatMap((e) => e.videos.map((v) => v.id)));
+  report.removedEvents = existing
+    .filter((e) => !current.has(e.id) && !e.videos.every((v) => stillShown.has(v.id)))
+    .map((e) => ({ id: e.id, title: e.title }));
   report.total = events.length;
   return { events, report };
 }

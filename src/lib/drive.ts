@@ -1,4 +1,5 @@
 import { JWT } from "google-auth-library";
+import { MEDIA_EXT_RE } from "./categories";
 import type { DriveFolder, DriveVideo } from "./types";
 
 const API = "https://www.googleapis.com/drive/v3/files";
@@ -148,7 +149,7 @@ export async function fetchDriveMedia(fileId: string, range?: string): Promise<R
  *   - every folder directly under the root is a category (its name is shown on the site);
  *   - every folder inside a category is an event; its media, including media in deeper
  *     sub-folders, are the event's items (kept in `videos` for historical reasons);
- *   - media placed directly in a category folder form one event named after the category.
+ *   - a media file placed directly in a category folder is an event of its own, named after the file.
  * Files placed directly in the root are ignored.
  */
 export async function fetchDriveFolders(rootId = ROOT_FOLDER_ID, cache?: ListingCache): Promise<DriveFolder[]> {
@@ -176,15 +177,14 @@ export async function fetchDriveFolders(rootId = ROOT_FOLDER_ID, cache?: Listing
           videos: await collectVideos(f.id),
         })),
       );
-      const loose = children.filter((f) => isMediaMime(f.mimeType));
-      if (loose.length)
+      for (const f of children.filter((c) => isMediaMime(c.mimeType)))
         events.push({
-          id: cat.id,
-          name: cat.name,
+          id: f.id,
+          name: f.name.replace(MEDIA_EXT_RE, "").replace(/_/g, " ").trim(),
           category: cat.name,
-          createdTime: cat.createdTime,
-          modifiedTime: cat.modifiedTime,
-          videos: loose,
+          createdTime: f.createdTime,
+          modifiedTime: f.modifiedTime,
+          videos: [f],
         });
       return events;
     }),
