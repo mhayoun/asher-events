@@ -88,8 +88,8 @@ export function EventExplorer({ events }: { events: EventItem[] }) {
 
   const activeYear = f.from.endsWith("-01-01") && f.to === `${f.from.slice(0, 4)}-12-31` ? f.from.slice(0, 4) : "";
   const hasFilters = Boolean(f.q || f.cats.length || f.from || f.to);
-  const toggleCat = (id: string) =>
-    update({ cats: f.cats.includes(id) ? f.cats.filter((c) => c !== id) : [...f.cats, id] });
+  // One category at a time: picking another replaces the current one, picking it again clears it.
+  const toggleCat = (id: string) => update({ cats: f.cats.includes(id) ? [] : [id] });
 
   return (
     <section id="events" className="mx-auto max-w-7xl scroll-mt-16 px-4 pb-16 pt-6">
