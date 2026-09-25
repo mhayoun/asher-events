@@ -20,6 +20,10 @@ events/                         ← DRIVE_ROOT_FOLDER_ID
 ```
 
 - **Category**: keywords in the folder and file names (`src/lib/categories.ts`). An event can have several.
+  If nothing matches, a **new category is created from the folder title**: years and numbers are dropped and the
+  title is cut before "who / where" words (`משפחת`, `של`, `עם`, `באולם`, a place like `במירון`, …), so
+  `יום הולדת 40 משפחת כהן 2026` → **יום הולדת**. Later folders containing the same words join that category.
+  To give it an icon or merge it with others, add it to `CATEGORIES`, or fix a single event in `data/overrides.json`.
 - **Date**: a year in the folder name (e.g. `סוכות 2024`), otherwise the earliest video's timestamp.
 - **Corrections**: `data/overrides.json`, keyed by folder id — set `title`, `date`, `datePrecision`, `location`, `description`, `categories`, or `hidden`.
 - Empty folders are skipped until they contain a video.

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { CATEGORIES, CATEGORY_BY_ID, normalize } from "@/lib/categories";
+import { categoryInfo, normalize, orderCategories } from "@/lib/categories";
 import { formatEventDate, isNew, mediaCount } from "@/lib/format";
 import type { EventItem } from "@/lib/types";
 import { Thumbnail } from "./Thumbnail";
@@ -16,7 +16,7 @@ function eventRange(e: EventItem): [string, string] {
 
 function searchText(e: EventItem): string {
   return normalize(
-    [e.title, e.location, e.description, ...e.videos.map((v) => v.title), ...e.categories.map((c) => CATEGORY_BY_ID[c]?.label)]
+    [e.title, e.location, e.description, ...e.videos.map((v) => v.title), ...e.categories.map((c) => categoryInfo(c).label)]
       .filter(Boolean)
       .join(" "),
   );
@@ -157,7 +157,7 @@ export function EventExplorer({ events }: { events: EventItem[] }) {
 
       {/* Categories */}
       <div className="mt-5 flex flex-wrap gap-2" role="group" aria-label="קטגוריות">
-        {CATEGORIES.filter((c) => counts[c.id]).map((c) => {
+        {orderCategories(Object.keys(counts)).map((c) => {
           const on = f.cats.includes(c.id);
           return (
             <button
@@ -216,7 +216,7 @@ export function EventExplorer({ events }: { events: EventItem[] }) {
 }
 
 function EventCard({ event: e }: { event: EventItem }) {
-  const main = CATEGORY_BY_ID[e.categories[0]] ?? CATEGORY_BY_ID.other;
+  const main = categoryInfo(e.categories[0] ?? "other");
   return (
     <Link
       href={`/events/${e.id}`}
@@ -239,7 +239,7 @@ function EventCard({ event: e }: { event: EventItem }) {
         <div className="mt-3 flex flex-wrap gap-1.5">
           {e.categories.map((c) => (
             <span key={c} className="rounded-full bg-surface-2 px-2 py-0.5 text-xs text-muted">
-              {CATEGORY_BY_ID[c]?.emoji} {CATEGORY_BY_ID[c]?.label}
+              {categoryInfo(c).emoji} {categoryInfo(c).label}
             </span>
           ))}
         </div>

@@ -1,6 +1,5 @@
 import { Suspense } from "react";
 import { EventExplorer } from "@/components/EventExplorer";
-import { CATEGORIES } from "@/lib/categories";
 import { getPublicEvents } from "@/lib/store";
 
 // Fresh data is pushed by the daily sync (revalidatePath); this is only a safety net.
@@ -34,7 +33,7 @@ export default async function Home() {
               [events.length, "אירועים"],
               [media.length - audio, "סרטונים"],
               ...(audio ? [[audio, "הקלטות"]] : []),
-              [Math.min(categories, CATEGORIES.length), "סוגי אירועים"],
+              [categories, "סוגי אירועים"],
               [span, "שנים"],
             ].map(([value, label]) => (
               <div key={label}>

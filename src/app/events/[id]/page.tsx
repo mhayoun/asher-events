@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { VideoPlayer } from "@/components/VideoPlayer";
-import { CATEGORY_BY_ID } from "@/lib/categories";
+import { categoryInfo } from "@/lib/categories";
 import { driveFolderUrl, formatEventDate, mediaCount, thumbnailUrl } from "@/lib/format";
 import { getPublicEvents } from "@/lib/store";
 
@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: PageProps<"/events/[id]">): P
 export default async function EventPage({ params }: PageProps<"/events/[id]">) {
   const event = await getEvent((await params).id);
   if (!event) notFound();
-  const main = CATEGORY_BY_ID[event.categories[0]] ?? CATEGORY_BY_ID.other;
+  const main = categoryInfo(event.categories[0] ?? "other");
 
   return (
     <article className="mx-auto max-w-7xl px-4 py-8">
@@ -43,10 +43,10 @@ export default async function EventPage({ params }: PageProps<"/events/[id]">) {
           {event.categories.map((c) => (
             <Link
               key={c}
-              href={`/?cat=${c}`}
+              href={`/?cat=${encodeURIComponent(c)}`}
               className="rounded-full border border-line bg-surface px-3 py-1 text-sm hover:border-gold"
             >
-              {CATEGORY_BY_ID[c]?.emoji} {CATEGORY_BY_ID[c]?.label}
+              {categoryInfo(c).emoji} {categoryInfo(c).label}
             </Link>
           ))}
         </div>

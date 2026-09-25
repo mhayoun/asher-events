@@ -1,4 +1,4 @@
-import { classify } from "./categories";
+import { type Category, categoryInfo, classify, isAutoCategory, MEDIA_EXT_RE } from "./categories";
 import type { DriveFolder, EventItem, EventVideo, Overrides, SyncReport } from "./types";
 
 const YEAR_RE = /(?<!\d)(19[89]\d|20\d\d)(?!\d)/g;
@@ -9,7 +9,7 @@ function years(text: string): number[] {
 
 export function cleanVideoTitle(name: string): string {
   return name
-    .replace(/\.(mp4|m4v|mov|avi|mkv|webm|mp3|m4a|wav|aac|ogg|flac)/gi, "")
+    .replace(MEDIA_EXT_RE, "")
     .replace(/_/g, " ")
     .replace(/\s+/g, " ")
     .trim();
@@ -33,7 +33,11 @@ function inferDate(folder: DriveFolder): Pick<EventItem, "date" | "datePrecision
   return { date: `${year}-01-01`, datePrecision: "year" };
 }
 
-export function buildEvent(folder: DriveFolder, override: Overrides[string] = {}): Omit<EventItem, "addedAt"> {
+export function buildEvent(
+  folder: DriveFolder,
+  override: Overrides[string] = {},
+  autoCategories: Category[] = [],
+): Omit<EventItem, "addedAt"> {
   const videos: EventVideo[] = folder.videos
     .map((v) => ({
       id: v.id,
@@ -47,7 +51,7 @@ export function buildEvent(folder: DriveFolder, override: Overrides[string] = {}
   return {
     id: folder.id,
     title: folder.name.trim(),
-    categories: classify(folder.name, folder.videos.map((v) => v.name)),
+    categories: classify(folder.name, folder.videos.map((v) => v.name), autoCategories),
     ...inferDate(folder),
     videos,
     ...override,
@@ -73,12 +77,20 @@ export function mergeEvents(
       }
   }
   const firstRun = existing.length === 0;
+  // Categories that earlier syncs created from folder titles; grows as this run creates new ones.
+  const autoCategories = new Map<string, Category>();
+  const rememberAuto = (ids: string[]) =>
+    ids.filter(isAutoCategory).forEach((id) => autoCategories.set(id, categoryInfo(id)));
+  existing.forEach((e) => rememberAuto(e.categories));
+  Object.values(overrides).forEach((o) => rememberAuto(o.categories ?? []));
+
   const report: SyncReport = { at: now, source, total: 0, newEvents: [], newVideos: [], removedEvents: [] };
 
   const events = folders
     .filter((f) => f.videos.length > 0) // empty folders are events still being uploaded
     .map((folder) => {
-      const built = buildEvent(folder, overrides[folder.id]);
+      const built = buildEvent(folder, overrides[folder.id], [...autoCategories.values()]);
+      rememberAuto(built.categories);
       const prev = previous.get(folder.id);
       // keep Blob copies made by earlier runs
       const mirrored = new Map(prev?.videos.filter((v) => v.url).map((v) => [v.id, v.url]));
