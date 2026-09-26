@@ -18,14 +18,17 @@ export interface DriveFolder {
   videos: DriveVideo[];
 }
 
+export type MediaKind = "video" | "audio" | "image";
+export const kindOf = (v: { kind?: "audio" | "image" }): MediaKind => v.kind ?? "video";
+
 /** What the site renders. One event = one sub-folder of the root Drive folder. */
 export interface EventVideo {
   id: string;
   title: string;
   size: number;
   modifiedTime: string;
-  /** Set for audio recordings (mp3, m4a, ...); videos leave it out. */
-  kind?: "audio";
+  /** Set for audio recordings and images; videos leave it out. */
+  kind?: "audio" | "image";
   /** Copy on Vercel Blob (optional mirror). When present the site plays it natively. */
   url?: string;
 }

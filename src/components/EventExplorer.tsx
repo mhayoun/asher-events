@@ -5,10 +5,20 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { categoryInfo, normalize, OTHER, orderCategories } from "@/lib/categories";
 import { formatEventDate, isNew, mediaCount } from "@/lib/format";
-import type { EventItem } from "@/lib/types";
+import { tagCloud, titleWords } from "@/lib/tags";
+import { type EventItem, kindOf, type MediaKind } from "@/lib/types";
 import { Thumbnail } from "./Thumbnail";
 
-type Filters = { q: string; cats: string[]; from: string; to: string; sort: "new" | "old" };
+type TypeFilter = MediaKind | "all";
+type Filters = { q: string; type: TypeFilter; cat: string; tags: string[]; from: string; to: string };
+
+const TYPES: { id: TypeFilter; label: string; emoji: string }[] = [
+  { id: "all", label: "הכל", emoji: "✨" },
+  { id: "video", label: "וידאו", emoji: "🎬" },
+  { id: "audio", label: "אודיו", emoji: "🎧" },
+  { id: "image", label: "תמונות", emoji: "🖼️" },
+];
+const isType = (t: string | null): t is MediaKind => t === "video" || t === "audio" || t === "image";
 
 function eventRange(e: EventItem): [string, string] {
   return e.datePrecision === "year" ? [`${e.date.slice(0, 4)}-01-01`, `${e.date.slice(0, 4)}-12-31`] : [e.date, e.date];
@@ -22,6 +32,15 @@ function searchText(e: EventItem): string {
   );
 }
 
+const chip = (on: boolean) =>
+  `flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm transition disabled:cursor-default disabled:opacity-40 ${
+    on ? "border-gold bg-gold-soft text-gold" : "border-line bg-surface hover:border-gold/60"
+  }`;
+
+/**
+ * Search, then narrow down step by step: media type → category → words of the titles (tags).
+ * Each row only offers what is left after the rows above it. Results are newest first.
+ */
 export function EventExplorer({ events }: { events: EventItem[] }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -29,22 +48,25 @@ export function EventExplorer({ events }: { events: EventItem[] }) {
 
   // The text box keeps its own state so typing stays smooth; the URL follows after a short pause.
   const [q, setQ] = useState(params.get("q") ?? "");
+  const typeParam = params.get("type");
   const f: Filters = {
     q,
-    cats: params.get("cat")?.split(",").filter(Boolean) ?? [],
+    type: isType(typeParam) ? typeParam : "all",
+    cat: params.get("cat") ?? "",
+    tags: params.get("tags")?.split(",").filter(Boolean) ?? [],
     from: params.get("from") ?? "",
     to: params.get("to") ?? "",
-    sort: params.get("sort") === "old" ? "old" : "new",
   };
 
   function update(next: Partial<Filters>) {
     const merged = { ...f, ...next };
     const sp = new URLSearchParams();
     if (merged.q) sp.set("q", merged.q);
-    if (merged.cats.length) sp.set("cat", merged.cats.join(","));
+    if (merged.type !== "all") sp.set("type", merged.type);
+    if (merged.cat) sp.set("cat", merged.cat);
+    if (merged.tags.length) sp.set("tags", merged.tags.join(","));
     if (merged.from) sp.set("from", merged.from);
     if (merged.to) sp.set("to", merged.to);
-    if (merged.sort === "old") sp.set("sort", "old");
     const qs = sp.toString();
     router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
   }
@@ -57,44 +79,74 @@ export function EventExplorer({ events }: { events: EventItem[] }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only the text should trigger this
   }, [q]);
 
-  const indexed = useMemo(() => events.map((e) => ({ e, text: searchText(e) })), [events]);
-  const counts = useMemo(() => {
-    const c: Record<string, number> = {};
-    for (const e of events) for (const id of e.categories) c[id] = (c[id] ?? 0) + 1;
-    return c;
-  }, [events]);
-  const years = useMemo(() => [...new Set(events.map((e) => e.date.slice(0, 4)))].sort().reverse(), [events]);
+  const indexed = useMemo(
+    () => events.map((e) => ({ e, text: searchText(e), words: new Set(titleWords(e).keys()) })),
+    [events],
+  );
 
-  const results = useMemo(() => {
+  // Step 1: text and dates.
+  const searched = useMemo(() => {
     const terms = normalize(f.q).split(" ").filter(Boolean);
-    return indexed
-      .filter(({ e, text }) => {
-        if (terms.length && !terms.every((t) => text.includes(t))) return false;
-        if (f.cats.length && !f.cats.some((c) => e.categories.includes(c))) return false;
-        const [start, end] = eventRange(e);
-        if (f.from && end < f.from) return false;
-        if (f.to && start > f.to) return false;
-        return true;
-      })
-      .map(({ e }) => e)
-      .sort((a, b) => (f.sort === "new" ? b.date.localeCompare(a.date) : a.date.localeCompare(b.date)));
-  }, [indexed, f.q, f.cats, f.from, f.to, f.sort]);
+    return indexed.filter(({ e, text }) => {
+      if (terms.length && !terms.every((t) => text.includes(t))) return false;
+      const [start, end] = eventRange(e);
+      if (f.from && end < f.from) return false;
+      if (f.to && start > f.to) return false;
+      return true;
+    });
+  }, [indexed, f.q, f.from, f.to]);
 
-  const grouped = useMemo(() => {
-    const map = new Map<string, EventItem[]>();
-    for (const e of results) map.set(e.date.slice(0, 4), [...(map.get(e.date.slice(0, 4)) ?? []), e]);
-    return [...map.entries()];
-  }, [results]);
+  // Step 2: media type (events holding at least one item of that type).
+  const typeCounts = useMemo(() => {
+    const c: Record<TypeFilter, number> = { all: 0, video: 0, audio: 0, image: 0 };
+    for (const { e } of searched)
+      for (const v of e.videos) {
+        c[kindOf(v)]++;
+        c.all++;
+      }
+    return c;
+  }, [searched]);
+  const typed = useMemo(
+    () => (f.type === "all" ? searched : searched.filter(({ e }) => e.videos.some((v) => kindOf(v) === f.type))),
+    [searched, f.type],
+  );
 
-  const activeYear = f.from.endsWith("-01-01") && f.to === `${f.from.slice(0, 4)}-12-31` ? f.from.slice(0, 4) : "";
-  const hasFilters = Boolean(f.q || f.cats.length || f.from || f.to);
-  // One category at a time: picking another replaces the current one, picking it again clears it.
-  const toggleCat = (id: string) => update({ cats: f.cats.includes(id) ? [] : [id] });
+  // Step 3: category.
+  const catCounts = useMemo(() => {
+    const c: Record<string, number> = {};
+    for (const { e } of typed) for (const id of e.categories) c[id] = (c[id] ?? 0) + 1;
+    return c;
+  }, [typed]);
+  const inCategory = useMemo(() => (f.cat ? typed.filter(({ e }) => e.categories.includes(f.cat)) : typed), [typed, f.cat]);
+
+  // Step 4: title words - every selected word must appear.
+  const results = useMemo(
+    () =>
+      inCategory
+        .filter(({ words }) => f.tags.every((t) => words.has(t)))
+        .map(({ e }) => e)
+        .sort((a, b) => b.date.localeCompare(a.date) || a.title.localeCompare(b.title, "he")),
+    [inCategory, f.tags],
+  );
+  const tags = useMemo(() => {
+    const cloud = tagCloud(results);
+    const shown = new Set(cloud.map((t) => t.id));
+    // keep selected words visible (and removable) even when they no longer narrow anything
+    const selected = f.tags
+      .filter((id) => !shown.has(id))
+      .map((id) => ({ id, label: indexed.flatMap(({ e }) => [...titleWords(e)]).find(([k]) => k === id)?.[1] ?? id, count: results.length }));
+    return [...selected, ...cloud];
+  }, [results, f.tags, indexed]);
+  const [minCount, maxCount] = tags.length ? [Math.min(...tags.map((t) => t.count)), Math.max(...tags.map((t) => t.count))] : [1, 1];
+
+  const hasFilters = Boolean(f.q || f.type !== "all" || f.cat || f.tags.length || f.from || f.to);
+  const pickCategory = (id: string) => update({ cat: f.cat === id ? "" : id, tags: [] });
+  const toggleTag = (id: string) => update({ tags: f.tags.includes(id) ? f.tags.filter((t) => t !== id) : [...f.tags, id] });
 
   return (
     <section id="events" className="mx-auto max-w-7xl scroll-mt-16 px-4 pb-16 pt-6">
-      {/* Search & date filters */}
-      <div className="z-20 -mx-4 md:sticky md:top-[61px] border-b border-line bg-bg/95 px-4 py-4">
+      {/* Text & dates */}
+      <div className="z-20 -mx-4 border-b border-line bg-bg/95 px-4 py-4 md:sticky md:top-[61px]">
         <div className="flex flex-col gap-3 md:flex-row md:items-end">
           <label className="flex-1">
             <span className="mb-1 block text-xs text-muted">חיפוש בכותרת או בשם שיר</span>
@@ -128,102 +180,110 @@ export function EventExplorer({ events }: { events: EventItem[] }) {
               />
             </label>
           </div>
-          <label>
-            <span className="mb-1 block text-xs text-muted">מיון</span>
-            <select
-              value={f.sort}
-              onChange={(e) => update({ sort: e.target.value as Filters["sort"] })}
-              className="rounded-xl border border-line bg-surface px-3 py-2.5 outline-none focus:border-gold"
-            >
-              <option value="new">מהחדש לישן</option>
-              <option value="old">מהישן לחדש</option>
-            </select>
-          </label>
         </div>
+      </div>
 
-        <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
-          <span className="text-muted">שנה:</span>
-          {years.map((y) => (
-            <button
-              key={y}
-              onClick={() => (activeYear === y ? update({ from: "", to: "" }) : update({ from: `${y}-01-01`, to: `${y}-12-31` }))}
-              className={`rounded-full border px-3 py-1 transition ${activeYear === y ? "border-gold bg-gold text-bg" : "border-line hover:border-gold"}`}
-            >
-              {y}
-            </button>
-          ))}
-        </div>
+      {/* Media type */}
+      <div className="mt-5 flex flex-wrap gap-2" role="group" aria-label="סוג מדיה">
+        {TYPES.map((t) => (
+          <button
+            key={t.id}
+            onClick={() => update({ type: t.id })}
+            aria-pressed={f.type === t.id}
+            disabled={t.id !== "all" && !typeCounts[t.id]}
+            className={chip(f.type === t.id)}
+          >
+            <span aria-hidden>{t.emoji}</span>
+            {t.label}
+            <span className="text-xs text-muted">{typeCounts[t.id]}</span>
+          </button>
+        ))}
       </div>
 
       {/* Categories */}
-      <div className="mt-5 flex flex-wrap gap-2" role="group" aria-label="קטגוריות">
-        {orderCategories(Object.keys(counts)).map((c) => {
-          const on = f.cats.includes(c.id);
-          return (
-            <button
-              key={c.id}
-              onClick={() => toggleCat(c.id)}
-              aria-pressed={on}
-              className={`flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm transition ${
-                on ? "border-gold bg-gold-soft text-gold" : "border-line bg-surface hover:border-gold/60"
-              }`}
-            >
-              <span aria-hidden>{c.emoji}</span>
-              {c.label}
-              <span className="text-xs text-muted">{counts[c.id]}</span>
-            </button>
-          );
-        })}
+      <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label="קטגוריות">
+        {orderCategories([...Object.keys(catCounts), ...(f.cat ? [f.cat] : [])]).map((c) => (
+          <button key={c.id} onClick={() => pickCategory(c.id)} aria-pressed={f.cat === c.id} className={chip(f.cat === c.id)}>
+            <span aria-hidden>{c.emoji}</span>
+            {c.label}
+            <span className="text-xs text-muted">{catCounts[c.id] ?? 0}</span>
+          </button>
+        ))}
       </div>
+
+      {/* Title words, bigger = more events */}
+      {tags.length > 0 && (
+        <div className="mt-4 rounded-2xl border border-line bg-surface/60 p-4">
+          <p className="mb-2 text-xs text-muted">
+            {f.cat ? `מילים מהכותרות ב${categoryInfo(f.cat).label}` : "מילים מהכותרות"} · אפשר לבחור כמה
+          </p>
+          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-2" role="group" aria-label="מילים">
+            {tags.map((t) => {
+              const on = f.tags.includes(t.id);
+              const weight = maxCount === minCount ? 0.5 : (t.count - minCount) / (maxCount - minCount);
+              return (
+                <button
+                  key={t.id}
+                  onClick={() => toggleTag(t.id)}
+                  aria-pressed={on}
+                  title={`${t.count} אירועים`}
+                  style={{ fontSize: `${0.8 + weight * 0.7}rem`, opacity: on ? 1 : 0.55 + weight * 0.45 }}
+                  className={`rounded-lg px-1.5 leading-tight transition hover:text-gold ${
+                    on ? "bg-gold-soft font-semibold text-gold ring-1 ring-gold" : ""
+                  }`}
+                >
+                  {t.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       <div className="mt-5 flex items-center justify-between text-sm text-muted">
         <span>
           נמצאו {results.length} אירועים · {mediaCount(results.flatMap((e) => e.videos))}
         </span>
         {hasFilters && (
-          <button onClick={() => {
+          <button
+            onClick={() => {
               setQ("");
-              update({ q: "", cats: [], from: "", to: "" });
-            }} className="text-gold hover:underline">
+              update({ q: "", type: "all", cat: "", tags: [], from: "", to: "" });
+            }}
+            className="text-gold hover:underline"
+          >
             ניקוי סינון ✕
           </button>
         )}
       </div>
 
-      {/* Timeline grouped by year */}
-      {grouped.length === 0 ? (
+      {results.length === 0 ? (
         <p className="py-20 text-center text-muted">לא נמצאו אירועים. נסו מילה אחרת או טווח תאריכים רחב יותר.</p>
       ) : (
-        grouped.map(([year, list]) => (
-          <div key={year} className="mt-8">
-            <h2 className="mb-4 flex items-center gap-3 font-display text-3xl font-bold text-gold">
-              {year}
-              <span className="h-px flex-1 bg-line" />
-              <span className="font-sans text-sm font-normal text-muted">{list.length} אירועים</span>
-            </h2>
-            <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {list.map((e) => (
-                <li key={e.id}>
-                  <EventCard event={e} />
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))
+        <ul className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {results.map((e) => (
+            <li key={e.id}>
+              <EventCard event={e} type={f.type} />
+            </li>
+          ))}
+        </ul>
       )}
     </section>
   );
 }
 
-function EventCard({ event: e }: { event: EventItem }) {
+function EventCard({ event: e, type }: { event: EventItem; type: TypeFilter }) {
   const main = categoryInfo(e.categories[0] ?? OTHER);
+  // With a type selected, open the event on its first item of that type.
+  const first = type === "all" ? undefined : e.videos.find((v) => kindOf(v) === type);
+  const cover = first && kindOf(first) !== "audio" ? first : e.videos.find((v) => kindOf(v) !== "audio");
   return (
     <Link
-      href={`/events/${e.id}`}
+      href={first ? `/events/${e.id}?v=${first.id}` : `/events/${e.id}`}
       className="group block overflow-hidden rounded-2xl border border-line bg-surface transition hover:-translate-y-0.5 hover:border-gold/60 hover:shadow-[0_10px_40px_-10px_#e3b45a40]"
     >
       <div className="relative aspect-video overflow-hidden bg-surface-2">
-        <Thumbnail fileId={e.videos.find((v) => v.kind !== "audio")?.id} emoji={main.emoji} alt={e.title} />
+        <Thumbnail fileId={cover?.id} emoji={main.emoji} alt={e.title} />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent" />
         <span className="absolute inset-0 m-auto grid h-14 w-14 place-items-center rounded-full bg-gold/90 text-2xl text-bg opacity-0 transition group-hover:opacity-100">
           ▶

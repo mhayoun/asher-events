@@ -41,6 +41,7 @@ export function buildEvent(folder: DriveFolder, override: Overrides[string] = {}
       size: Number(v.size ?? 0),
       modifiedTime: v.modifiedTime,
       ...(v.mimeType.startsWith("audio/") && { kind: "audio" as const }),
+      ...(v.mimeType.startsWith("image/") && { kind: "image" as const }),
     }))
     .sort((a, b) => a.title.localeCompare(b.title, "he", { numeric: true }));
 

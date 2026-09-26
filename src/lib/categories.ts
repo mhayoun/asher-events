@@ -1,5 +1,5 @@
 /** File extensions of the media the sync picks up; stripped from titles. */
-export const MEDIA_EXT_RE = /\.(mp4|m4v|mov|avi|mkv|webm|3gp|mpg|mpeg|wmv|mp3|m4a|wav|aac|ogg|oga|flac|wma)/gi;
+export const MEDIA_EXT_RE = /\.(mp4|m4v|mov|avi|mkv|webm|3gp|mpg|mpeg|wmv|mp3|m4a|wav|aac|ogg|oga|flac|wma|jpe?g|png|gif|webp|heic|heif|bmp)/gi;
 
 /** Categories are the folders directly under the Drive root; an event's category is its parent folder's name. */
 export interface Category {

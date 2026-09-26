@@ -32,7 +32,16 @@ export function VideoPlayer({ videos, emoji }: { videos: EventVideo[]; emoji: st
     <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
       <div>
         <div className="relative aspect-video overflow-hidden rounded-2xl border border-line bg-black shadow-2xl">
-          {!native ? (
+          {current.kind === "image" ? (
+            // eslint-disable-next-line @next/next/no-img-element -- Drive renders (and converts, e.g. HEIC) the image
+            <img
+              key={current.id}
+              src={thumbnailUrl(current.id, 1600)}
+              alt={current.title}
+              referrerPolicy="no-referrer"
+              className="absolute inset-0 h-full w-full object-contain"
+            />
+          ) : !native ? (
             <iframe
               key={`drive-${current.id}`}
               src={embedUrl(current.id)}
@@ -64,7 +73,7 @@ export function VideoPlayer({ videos, emoji }: { videos: EventVideo[]; emoji: st
         <div className="mt-3 flex items-center justify-between gap-4">
           <h2 className="text-xl font-semibold">{current.title}</h2>
           <div className="flex shrink-0 flex-col items-end gap-1 text-sm">
-            {native && (
+            {native && current.kind !== "image" && (
               <button onClick={fallBack} className="text-muted hover:text-gold">
                 לא מתנגן? נגן חלופי
               </button>

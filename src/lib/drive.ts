@@ -20,8 +20,9 @@ export function hasDriveCredentials(): boolean {
 
 const VIDEO_EXT = /\.(mp4|m4v|mov|avi|mkv|webm|3gp|mpg|mpeg|wmv)$/i;
 const AUDIO_EXT = /\.(mp3|m4a|wav|aac|ogg|oga|flac|wma)$/i;
+const IMAGE_EXT = /\.(jpe?g|png|gif|webp|heic|heif|bmp)$/i;
 
-export const isMediaMime = (mime: string) => mime.startsWith("video/") || mime.startsWith("audio/");
+export const isMediaMime = (mime: string) => /^(video|audio|image)\//.test(mime);
 
 /** "10/8/25" (US format used by the public view) → ISO. Times ("10:30 AM") mean today. */
 function parsePublicDate(text: string): string {
@@ -58,6 +59,7 @@ async function listPublicChildren(folderId: string, cache: ListingCache) {
     const isFolder = /href="[^"]*\/folders\//.test(chunk);
     const isVideo = /alt="Video"/.test(chunk);
     const isAudio = /alt="Audio"/.test(chunk);
+    const isImage = /alt="Image"/.test(chunk);
     const name = decodeHtml(chunk.match(/flip-entry-title">([^<]*)/)?.[1]?.trim() ?? "");
     const modified = parsePublicDate(chunk.match(/flip-entry-last-modified"><div>([^<]*)/)?.[1] ?? "");
     return {
@@ -69,7 +71,9 @@ async function listPublicChildren(folderId: string, cache: ListingCache) {
           ? "video/mp4"
           : isAudio || AUDIO_EXT.test(name)
             ? "audio/mpeg"
-            : "application/octet-stream",
+            : isImage || IMAGE_EXT.test(name)
+              ? "image/jpeg"
+              : "application/octet-stream",
       createdTime: modified,
       modifiedTime: modified,
     };

@@ -1,4 +1,4 @@
-import type { EventItem } from "./types";
+import { type EventItem, kindOf, type MediaKind } from "./types";
 
 const dayFmt = new Intl.DateTimeFormat("he-IL", { day: "numeric", month: "long", year: "numeric" });
 
@@ -17,13 +17,14 @@ export const embedUrl = (fileId: string) => `https://drive.google.com/file/d/${f
 export const driveFileUrl = (fileId: string) => `https://drive.google.com/file/d/${fileId}/view`;
 export const driveFolderUrl = (folderId: string) => `https://drive.google.com/drive/folders/${folderId}`;
 
-/** "4 סרטונים", "הקלטה אחת", "2 סרטונים · הקלטה אחת" */
-export function mediaCount(items: { kind?: "audio" }[]): string {
-  const audio = items.filter((m) => m.kind === "audio").length;
-  const video = items.length - audio;
+/** "4 סרטונים", "הקלטה אחת", "2 סרטונים · הקלטה אחת · 3 תמונות" */
+export function mediaCount(items: { kind?: "audio" | "image" }[]): string {
+  const n = (k: MediaKind) => items.filter((m) => kindOf(m) === k).length;
+  const [video, audio, image] = [n("video"), n("audio"), n("image")];
   const parts = [];
   if (video) parts.push(video === 1 ? "סרטון אחד" : `${video} סרטונים`);
   if (audio) parts.push(audio === 1 ? "הקלטה אחת" : `${audio} הקלטות`);
+  if (image) parts.push(image === 1 ? "תמונה אחת" : `${image} תמונות`);
   return parts.join(" · ");
 }
 

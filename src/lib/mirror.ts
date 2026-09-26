@@ -14,7 +14,8 @@ export async function mirrorVideos(
   { budgetMs = Infinity, log = console.log }: { budgetMs?: number; log?: (msg: string) => void } = {},
 ): Promise<{ mirrored: number; pending: number }> {
   const started = Date.now();
-  const todo = events.flatMap((e) => e.videos.filter((v) => !v.url).map((v) => ({ e, v })));
+  // images are shown through Drive thumbnails, only videos/recordings are copied
+  const todo = events.flatMap((e) => e.videos.filter((v) => !v.url && v.kind !== "image").map((v) => ({ e, v })));
   let mirrored = 0;
   for (const { e, v } of todo) {
     if (Date.now() - started > budgetMs) break;
