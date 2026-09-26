@@ -12,6 +12,8 @@ const STOP_WORDS = new Set(
 const PHRASES: { label: string; re: RegExp }[] = [
   { label: "בר מצוה", re: /בר[\s-]*מצו{1,2}ה/g }, // בר מצוה / בר מצווה / בר-מצוה
   { label: "גבעת זאב", re: /גבעת[\s-]+ז[אע]ב/g }, // also the "גבעת זעב" spelling used in one folder
+  { label: "ברית מילה", re: /ברית[\s-]+מילה/g },
+  { label: "שבע ברכות", re: /שבע[\s-]+ברכות/g },
 ];
 
 export interface Tag {
