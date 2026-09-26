@@ -9,9 +9,6 @@ export const revalidate = 3600;
 
 export default async function Home() {
   const events = await getPublicEvents();
-  const media = events.flatMap((e) => e.videos);
-  const audio = media.filter((m) => m.kind === "audio").length;
-  const categories = new Set(events.flatMap((e) => e.categories)).size;
 
   return (
     <>
@@ -29,25 +26,7 @@ export default async function Home() {
               בתלמודי תורה - וגם הופעות של התלמידים. בחרו קטגוריה, חפשו שם של
               שיר או סננו לפי תאריך.
             </p>
-            <dl className="mt-8 flex flex-wrap gap-8">
-              {[
-                [events.length, "אירועים"],
-                [media.length - audio, "סרטונים"],
-                ...(audio ? [[audio, "הקלטות"]] : []),
-                [categories, "קטגוריות"],
-              ].map(([value, label]) => (
-                <div key={label}>
-                  <dt className="text-sm text-muted">{label}</dt>
-                  <dd
-                    dir="ltr"
-                    className="text-right font-display text-3xl font-bold text-gold"
-                  >
-                    {value}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          </div>
+            </div>
 
           <aside
             aria-labelledby="lessons-title"
