@@ -11,6 +11,8 @@ const heebo = Heebo({ variable: "--font-heebo", subsets: ["hebrew", "latin"] });
 const frank = Frank_Ruhl_Libre({ variable: "--font-frank", subsets: ["hebrew", "latin"], weight: ["500", "700", "900"] });
 
 export const metadata: Metadata = {
+  // Absolute URLs for link previews (WhatsApp, Facebook…)
+  metadataBase: new URL("https://asherhayoun.com"),
   title: { default: "אשר חיון · אירועים ונגינה", template: "%s · אשר חיון" },
   description: "גלריית הווידאו של אשר חיון - מורה למוזיקה: בר מצוות, בריתות, שבע ברכות, הכנסות ספר תורה, מסיבות חומש ועוד.",
 };

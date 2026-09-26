@@ -1,6 +1,6 @@
 # אשר חיון · אירועים
 
-**Live:** https://asher-events.vercel.app
+**Live:** https://asherhayoun.com (also https://asher-events.vercel.app)
 
 Video gallery of a music teacher's events (בר מצוה, ברית מילה, שבע ברכות, …), built from a Google Drive folder.
 
