@@ -10,7 +10,7 @@ import { type EventItem, kindOf, type MediaKind } from "@/lib/types";
 import { Thumbnail } from "./Thumbnail";
 
 type TypeFilter = MediaKind | "all";
-type Filters = { q: string; type: TypeFilter; cat: string; tags: string[]; from: string; to: string };
+type Filters = { q: string; type: TypeFilter; cat: string; sub: string; tags: string[]; from: string; to: string };
 
 const TYPES: { id: TypeFilter; label: string; emoji: string }[] = [
   { id: "all", label: "הכל", emoji: "✨" },
@@ -32,13 +32,25 @@ function searchText(e: EventItem): string {
   );
 }
 
+/** A framed filter row with its title. */
+function FilterBox({ title, label, children }: { title: string; label: string; children: React.ReactNode }) {
+  return (
+    <div className="rounded-2xl border border-line bg-surface/60 p-4">
+      <p className="mb-2 text-xs font-semibold tracking-wide text-muted">{title}</p>
+      <div className="flex flex-wrap items-baseline gap-2" role="group" aria-label={label}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
 const chip = (on: boolean) =>
   `flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm transition disabled:cursor-default disabled:opacity-40 ${
     on ? "border-gold bg-gold-soft text-gold" : "border-line bg-surface hover:border-gold/60"
   }`;
 
 /**
- * Search, then narrow down step by step: media type → category → words of the titles (tags).
+ * Search, then narrow down step by step: media type → category → sub-category → words of the titles.
  * Each row only offers what is left after the rows above it. Results are newest first.
  */
 export function EventExplorer({ events }: { events: EventItem[] }) {
@@ -53,6 +65,7 @@ export function EventExplorer({ events }: { events: EventItem[] }) {
     q,
     type: isType(typeParam) ? typeParam : "all",
     cat: params.get("cat") ?? "",
+    sub: params.get("sub") ?? "",
     tags: params.get("tags")?.split(",").filter(Boolean) ?? [],
     from: params.get("from") ?? "",
     to: params.get("to") ?? "",
@@ -64,6 +77,7 @@ export function EventExplorer({ events }: { events: EventItem[] }) {
     if (merged.q) sp.set("q", merged.q);
     if (merged.type !== "all") sp.set("type", merged.type);
     if (merged.cat) sp.set("cat", merged.cat);
+    if (merged.cat && merged.sub) sp.set("sub", merged.sub);
     if (merged.tags.length) sp.set("tags", merged.tags.join(","));
     if (merged.from) sp.set("from", merged.from);
     if (merged.to) sp.set("to", merged.to);
@@ -119,14 +133,25 @@ export function EventExplorer({ events }: { events: EventItem[] }) {
   }, [typed]);
   const inCategory = useMemo(() => (f.cat ? typed.filter(({ e }) => e.categories.includes(f.cat)) : typed), [typed, f.cat]);
 
-  // Step 4: title words - every selected word must appear.
+  // Step 4: sub-category (only once a category is chosen).
+  const subCounts = useMemo(() => {
+    const c: Record<string, number> = {};
+    for (const { e } of inCategory) if (e.subcategory) c[e.subcategory] = (c[e.subcategory] ?? 0) + 1;
+    return c;
+  }, [inCategory]);
+  const inSub = useMemo(
+    () => (f.cat && f.sub ? inCategory.filter(({ e }) => e.subcategory === f.sub) : inCategory),
+    [inCategory, f.cat, f.sub],
+  );
+
+  // Step 5: title words - every selected word must appear.
   const results = useMemo(
     () =>
-      inCategory
+      inSub
         .filter(({ words }) => f.tags.every((t) => words.has(t)))
         .map(({ e }) => e)
         .sort((a, b) => b.date.localeCompare(a.date) || a.title.localeCompare(b.title, "he")),
-    [inCategory, f.tags],
+    [inSub, f.tags],
   );
   const tags = useMemo(() => {
     const cloud = tagCloud(results);
@@ -140,7 +165,9 @@ export function EventExplorer({ events }: { events: EventItem[] }) {
   const [minCount, maxCount] = tags.length ? [Math.min(...tags.map((t) => t.count)), Math.max(...tags.map((t) => t.count))] : [1, 1];
 
   const hasFilters = Boolean(f.q || f.type !== "all" || f.cat || f.tags.length || f.from || f.to);
-  const pickCategory = (id: string) => update({ cat: f.cat === id ? "" : id, tags: [] });
+  const pickCategory = (id: string) => update({ cat: f.cat === id ? "" : id, sub: "", tags: [] });
+  const pickSub = (id: string) => update({ sub: id, tags: [] });
+  const subs = Object.keys(subCounts).sort((a, b) => a.localeCompare(b, "he"));
   const toggleTag = (id: string) => update({ tags: f.tags.includes(id) ? f.tags.filter((t) => t !== id) : [...f.tags, id] });
 
   return (
@@ -183,41 +210,53 @@ export function EventExplorer({ events }: { events: EventItem[] }) {
         </div>
       </div>
 
-      {/* Media type */}
-      <div className="mt-5 flex flex-wrap gap-2" role="group" aria-label="סוג מדיה">
-        {TYPES.map((t) => (
-          <button
-            key={t.id}
-            onClick={() => update({ type: t.id })}
-            aria-pressed={f.type === t.id}
-            disabled={t.id !== "all" && !typeCounts[t.id]}
-            className={chip(f.type === t.id)}
+      <div className="mt-5 space-y-3">
+        <FilterBox title="סוג" label="סוג מדיה">
+          {TYPES.map((t) => (
+            <button
+              key={t.id}
+              onClick={() => update({ type: t.id })}
+              aria-pressed={f.type === t.id}
+              disabled={t.id !== "all" && !typeCounts[t.id]}
+              className={chip(f.type === t.id)}
+            >
+              <span aria-hidden>{t.emoji}</span>
+              {t.label}
+              <span className="text-xs text-muted">{typeCounts[t.id]}</span>
+            </button>
+          ))}
+        </FilterBox>
+
+        <FilterBox title="קטגוריה" label="קטגוריות">
+          {orderCategories([...Object.keys(catCounts), ...(f.cat ? [f.cat] : [])]).map((c) => (
+            <button key={c.id} onClick={() => pickCategory(c.id)} aria-pressed={f.cat === c.id} className={chip(f.cat === c.id)}>
+              <span aria-hidden>{c.emoji}</span>
+              {c.label}
+              <span className="text-xs text-muted">{catCounts[c.id] ?? 0}</span>
+            </button>
+          ))}
+        </FilterBox>
+
+        {f.cat && subs.length > 0 && (
+          <FilterBox title={`תת-קטגוריה ב${categoryInfo(f.cat).label}`} label="תת-קטגוריות">
+            <button onClick={() => pickSub("")} aria-pressed={!f.sub} className={chip(!f.sub)}>
+              הכל
+              <span className="text-xs text-muted">{inCategory.length}</span>
+            </button>
+            {subs.map((id) => (
+              <button key={id} onClick={() => pickSub(id)} aria-pressed={f.sub === id} className={chip(f.sub === id)}>
+                {id}
+                <span className="text-xs text-muted">{subCounts[id]}</span>
+              </button>
+            ))}
+          </FilterBox>
+        )}
+
+        {tags.length > 0 && (
+          <FilterBox
+            title={`מילים מהכותרות${f.sub ? ` ב${f.sub}` : f.cat ? ` ב${categoryInfo(f.cat).label}` : ""} · אפשר לבחור כמה`}
+            label="מילים"
           >
-            <span aria-hidden>{t.emoji}</span>
-            {t.label}
-            <span className="text-xs text-muted">{typeCounts[t.id]}</span>
-          </button>
-        ))}
-      </div>
-
-      {/* Categories */}
-      <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label="קטגוריות">
-        {orderCategories([...Object.keys(catCounts), ...(f.cat ? [f.cat] : [])]).map((c) => (
-          <button key={c.id} onClick={() => pickCategory(c.id)} aria-pressed={f.cat === c.id} className={chip(f.cat === c.id)}>
-            <span aria-hidden>{c.emoji}</span>
-            {c.label}
-            <span className="text-xs text-muted">{catCounts[c.id] ?? 0}</span>
-          </button>
-        ))}
-      </div>
-
-      {/* Title words, bigger = more events */}
-      {tags.length > 0 && (
-        <div className="mt-4 rounded-2xl border border-line bg-surface/60 p-4">
-          <p className="mb-2 text-xs text-muted">
-            {f.cat ? `מילים מהכותרות ב${categoryInfo(f.cat).label}` : "מילים מהכותרות"} · אפשר לבחור כמה
-          </p>
-          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-2" role="group" aria-label="מילים">
             {tags.map((t) => {
               const on = f.tags.includes(t.id);
               const weight = maxCount === minCount ? 0.5 : (t.count - minCount) / (maxCount - minCount);
@@ -236,9 +275,9 @@ export function EventExplorer({ events }: { events: EventItem[] }) {
                 </button>
               );
             })}
-          </div>
-        </div>
-      )}
+          </FilterBox>
+        )}
+      </div>
 
       <div className="mt-5 flex items-center justify-between text-sm text-muted">
         <span>
@@ -248,7 +287,7 @@ export function EventExplorer({ events }: { events: EventItem[] }) {
           <button
             onClick={() => {
               setQ("");
-              update({ q: "", type: "all", cat: "", tags: [], from: "", to: "" });
+              update({ q: "", type: "all", cat: "", sub: "", tags: [], from: "", to: "" });
             }}
             className="text-gold hover:underline"
           >

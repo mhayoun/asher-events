@@ -1,10 +1,31 @@
 [
  {
+  "id": "1p6y-GrBdXHvz-FI5SOBx95QVTTkPdsnS",
+  "title": "מפוחית",
+  "categories": [
+   "כלי נגינה"
+  ],
+  "subcategory": "מפוחית",
+  "date": "2026-09-26",
+  "datePrecision": "day",
+  "videos": [
+   {
+    "id": "1tcfds0YeG_497RzYFNqrq_Y1ZUV1vH4x",
+    "title": "asher armonica",
+    "size": 0,
+    "modifiedTime": "2026-09-26T12:00:00.000Z",
+    "kind": "audio"
+   }
+  ],
+  "addedAt": "2026-09-25T13:05:05.131Z"
+ },
+ {
   "id": "1PwcZM3yfMVUs_KalKZszqj5HuwVtKqJI",
   "title": "ברית מילה רמות 2024",
   "categories": [
    "ברית מילה"
   ],
+  "subcategory": "ברית מילה רמות 2024",
   "date": "2024-12-30",
   "datePrecision": "day",
   "videos": [
@@ -23,6 +44,7 @@
   "categories": [
    "בר מצוה"
   ],
+  "subcategory": "בר מצווה של תלמיד - בית אהרון 2024",
   "date": "2024-08-30",
   "datePrecision": "day",
   "videos": [
@@ -47,6 +69,7 @@
   "categories": [
    "אירועים"
   ],
+  "subcategory": "אשר חיון ואבי בריז זיץ במושב אלמוג",
   "date": "2024-08-29",
   "datePrecision": "day",
   "videos": [
@@ -83,6 +106,7 @@
   "categories": [
    "אירועים"
   ],
+  "subcategory": "אשר חיון ואבי בריז זיץ קיץ במלון שלום 2024",
   "date": "2024-08-29",
   "datePrecision": "day",
   "videos": [
@@ -119,6 +143,7 @@
   "categories": [
    "שבע ברכות"
   ],
+  "subcategory": "שבע ברכות גבעת זאב",
   "date": "2024-08-20",
   "datePrecision": "day",
   "videos": [
@@ -155,6 +180,7 @@
   "categories": [
    "בר מצוה"
   ],
+  "subcategory": "בר מצוה 2024 גבעת זעב",
   "date": "2024-07-09",
   "datePrecision": "day",
   "videos": [
@@ -239,6 +265,7 @@
   "categories": [
    "מקהלת ילדים"
   ],
+  "subcategory": "מסיבת חומש תלמוד תורה מענה שמחה",
   "date": "2024-07-01",
   "datePrecision": "day",
   "videos": [
@@ -257,6 +284,7 @@
   "categories": [
    "מקהלת ילדים"
   ],
+  "subcategory": "מסיבת חנוכה בישיבת תורה מציון גבעת זאב עם התלמיד אברהם קס",
   "date": "2024-06-20",
   "datePrecision": "day",
   "videos": [
@@ -270,29 +298,12 @@
   "addedAt": "2024-07-01T19:18:32.170Z"
  },
  {
-  "id": "1p6y-GrBdXHvz-FI5SOBx95QVTTkPdsnS",
-  "title": "מפוחית",
-  "categories": [
-   "כלי נגינה"
-  ],
-  "date": "2024-05-02",
-  "datePrecision": "day",
-  "videos": [
-   {
-    "id": "1Ps9owRo66eyDVmZUjbAngj1dgJcuqEzf",
-    "title": "asher armonica",
-    "size": 0,
-    "modifiedTime": "2024-05-02T12:00:00.000Z"
-   }
-  ],
-  "addedAt": "2026-09-25T13:05:05.131Z"
- },
- {
   "id": "1C6BfRcwRYRS_jc2DIrp99rManDAU2DWr",
   "title": "סקסופון",
   "categories": [
    "כלי נגינה"
   ],
+  "subcategory": "סקסופון",
   "date": "2024-04-24",
   "datePrecision": "day",
   "videos": [
@@ -426,6 +437,7 @@
   "categories": [
    "תזמורת ילדים"
   ],
+  "subcategory": "סוכות 2024",
   "date": "2024-01-01",
   "datePrecision": "year",
   "videos": [
@@ -480,6 +492,7 @@
   "categories": [
    "ברית מילה"
   ],
+  "subcategory": "ברית מילה רמות 2023",
   "date": "2023-01-01",
   "datePrecision": "year",
   "videos": [
@@ -522,6 +535,7 @@
   "categories": [
    "ילד הפלא"
   ],
+  "subcategory": "ילד הפלא דוד מחמלי",
   "date": "2022-01-01",
   "datePrecision": "year",
   "videos": [
@@ -552,6 +566,7 @@
   "categories": [
    "כלי נגינה"
   ],
+  "subcategory": "נגינה על סנטור באולפן",
   "date": "2022-01-01",
   "datePrecision": "year",
   "videos": [
@@ -570,6 +585,7 @@
   "categories": [
    "אירועים"
   ],
+  "subcategory": "סיום השס בגבעת זאב 2022",
   "date": "2022-01-01",
   "datePrecision": "year",
   "videos": [
@@ -588,6 +604,7 @@
   "categories": [
    "תזמורת ילדים"
   ],
+  "subcategory": "סוכות 2021",
   "date": "2021-01-01",
   "datePrecision": "year",
   "videos": [

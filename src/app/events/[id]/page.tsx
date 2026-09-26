@@ -49,6 +49,17 @@ export default async function EventPage({ params }: PageProps<"/events/[id]">) {
             </Link>
           </span>
         ))}
+        {event.subcategory && event.subcategory !== event.title && (
+          <span className="flex items-center gap-2">
+            <span aria-hidden>‹</span>
+            <Link
+              href={`/?cat=${encodeURIComponent(event.categories[0])}&sub=${encodeURIComponent(event.subcategory)}#events`}
+              className="hover:text-gold"
+            >
+              {event.subcategory}
+            </Link>
+          </span>
+        )}
       </nav>
       <header className="mb-6 mt-3">
         <h1 className="mt-3 font-display text-3xl font-bold md:text-5xl">{event.title}</h1>

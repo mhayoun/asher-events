@@ -49,6 +49,7 @@ export function buildEvent(folder: DriveFolder, override: Overrides[string] = {}
     id: folder.id,
     title: folder.name.trim(),
     categories: [folder.category ?? OTHER],
+    ...(folder.subcategory && { subcategory: folder.subcategory }),
     ...inferDate(folder),
     videos,
     ...override,

@@ -26,6 +26,8 @@ events/                              ← DRIVE_ROOT_FOLDER_ID
     └── רקודים 01.mp4                ← media directly in a category = one event named like the category
 ```
 
+- **Sub-category** = a folder inside a category (e.g. `כלי נגינה / סקסופון`). Without sub-folders it is one event
+  of the same name; if it holds folders, each of them is an event of that sub-category.
 - **Category** = the folder directly under the root. New category folders appear on the site automatically;
   their icon comes from keywords in `src/lib/categories.ts` (🎵 when nothing matches).
 - **Event** = a folder inside a category. Its videos/recordings, including those in deeper sub-folders, are its items.
@@ -71,7 +73,7 @@ npm run sync -- --snapshot     # rebuild data/events.json from data/drive-snapsh
 
 | Path | |
 |---|---|
-| `/` | Gallery: text + date search, then media type → category → title words (`?q=&type=video|audio|image&cat=&tags=&from=&to=`), newest first |
+| `/` | Gallery: text + date search, then media type → category → sub-category → title words (`?q=&type=video|audio|image&cat=&sub=&tags=&from=&to=`), newest first |
 | `/events/[folderId]?v=[videoId]` | Event page with player and playlist |
 | `/api/sync` | POST `{ password }`: the header button. Checks Drive now and expires the cached listing |
 | `/api/events` | JSON of all events and the last sync report |

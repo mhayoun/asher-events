@@ -149,47 +149,60 @@ export async function fetchDriveMedia(fileId: string, range?: string): Promise<R
 }
 
 /**
- * The Drive folder is organised as  root / category / event / media files:
+ * The Drive folder is organised as  root / category / sub-category / [event /] media files:
  *   - every folder directly under the root is a category (its name is shown on the site);
- *   - every folder inside a category is an event; its media, including media in deeper
- *     sub-folders, are the event's items (kept in `videos` for historical reasons);
- *   - a media file placed directly in a category folder is an event of its own, named after the file.
+ *   - every folder inside a category is a sub-category. If it holds folders, each of them is an
+ *     event (with all media below it); media placed directly in it form one event named after it.
+ *     Without sub-folders it is simply one event of the same name (the usual case today);
+ *   - a media file placed directly in a category folder is an event of its own, named after the
+ *     file, without sub-category.
  * Files placed directly in the root are ignored.
  */
 export async function fetchDriveFolders(rootId = ROOT_FOLDER_ID, cache?: ListingCache): Promise<DriveFolder[]> {
   const auth = hasDriveCredentials() ? await authParams() : null;
   const list = (id: string) => (auth ? listChildren(id, auth, cache) : listPublicChildren(id, cache));
   const isFolder = (f: { mimeType: string }) => f.mimeType === FOLDER_MIME;
+  const isMedia = (f: { mimeType: string }) => isMediaMime(f.mimeType);
 
   async function collectVideos(folderId: string): Promise<DriveVideo[]> {
     const children = await list(folderId);
     const nested = await Promise.all(children.filter(isFolder).map((f) => collectVideos(f.id)));
-    return [...children.filter((f) => isMediaMime(f.mimeType)), ...nested.flat()];
+    return [...children.filter(isMedia), ...nested.flat()];
   }
+
+  type Entry = Awaited<ReturnType<typeof list>>[number];
+  const eventOf = (f: Entry, category: string, subcategory: string | undefined, videos: DriveVideo[]): DriveFolder => ({
+    id: f.id,
+    name: f.name,
+    category,
+    ...(subcategory && { subcategory }),
+    createdTime: f.createdTime,
+    modifiedTime: f.modifiedTime,
+    videos,
+  });
 
   const categories = (await list(rootId)).filter(isFolder);
   const perCategory = await Promise.all(
     categories.map(async (cat) => {
       const children = await list(cat.id);
-      const events: DriveFolder[] = await Promise.all(
-        children.filter(isFolder).map(async (f) => ({
-          id: f.id,
-          name: f.name,
-          category: cat.name,
-          createdTime: f.createdTime,
-          modifiedTime: f.modifiedTime,
-          videos: await collectVideos(f.id),
-        })),
-      );
-      for (const f of children.filter((c) => isMediaMime(c.mimeType)))
-        events.push({
-          id: f.id,
-          name: f.name.replace(MEDIA_EXT_RE, "").replace(/_/g, " ").trim(),
-          category: cat.name,
-          createdTime: f.createdTime,
-          modifiedTime: f.modifiedTime,
-          videos: [f],
-        });
+      const events = (
+        await Promise.all(
+          children.filter(isFolder).map(async (sub) => {
+            const inside = await list(sub.id);
+            const folders = inside.filter(isFolder);
+            if (!folders.length) return [eventOf(sub, cat.name, sub.name, inside.filter(isMedia))];
+            const nested = await Promise.all(
+              folders.map(async (ev) => eventOf(ev, cat.name, sub.name, await collectVideos(ev.id))),
+            );
+            const loose = inside.filter(isMedia);
+            return loose.length ? [...nested, eventOf(sub, cat.name, sub.name, loose)] : nested;
+          }),
+        )
+      ).flat();
+      for (const f of children.filter(isMedia))
+        events.push(
+          eventOf({ ...f, name: f.name.replace(MEDIA_EXT_RE, "").replace(/_/g, " ").trim() }, cat.name, undefined, [f]),
+        );
       return events;
     }),
   );

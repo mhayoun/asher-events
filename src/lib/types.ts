@@ -13,6 +13,8 @@ export interface DriveFolder {
   name: string;
   /** Name of the category folder the event sits in. */
   category?: string;
+  /** Name of the folder inside the category (see fetchDriveFolders); absent for loose files. */
+  subcategory?: string;
   createdTime: string;
   modifiedTime: string;
   videos: DriveVideo[];
@@ -37,6 +39,7 @@ export interface EventItem {
   id: string; // Drive folder id
   title: string;
   categories: string[]; // category folder name(s) in Drive; see categories.ts for icons
+  subcategory?: string; // folder inside the category, e.g. "סקסופון" in "כלי נגינה"
   date: string; // YYYY-MM-DD (YYYY-01-01 when only the year is known)
   datePrecision: "day" | "year";
   location?: string;
