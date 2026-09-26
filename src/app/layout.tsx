@@ -29,14 +29,16 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <div className="order-last flex w-full justify-center sm:order-none sm:w-auto sm:flex-1">
               <NavLinks />
             </div>
-            <SyncButton />
+            <div className="flex items-center gap-2">
+              <SyncButton />
+              <WhatsAppButton />
+            </div>
           </div>
         </header>
         <main className="flex-1">{children}</main>
         <footer className="border-t border-line py-6 text-center text-sm text-muted">
           © {new Date().getFullYear()} אשר חיון · כל הסרטונים מתעדכנים אוטומטית מתיקיית האירועים
         </footer>
-        <WhatsAppButton />
       </body>
     </html>
   );
