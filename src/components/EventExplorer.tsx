@@ -311,38 +311,69 @@ export function EventExplorer({ events }: { events: EventItem[] }) {
   );
 }
 
+const KIND_ICON = { video: "🎬", audio: "🎧", image: "🖼️" } as const;
+const FILES_SHOWN = 3;
+
 function EventCard({ event: e, type }: { event: EventItem; type: TypeFilter }) {
   const main = categoryInfo(e.categories[0] ?? OTHER);
-  // With a type selected, open the event on its first item of that type.
+  // With a type selected, open the event on its first item of that type, and list those items first.
   const first = type === "all" ? undefined : e.videos.find((v) => kindOf(v) === type);
   const cover = first && kindOf(first) !== "audio" ? first : e.videos.find((v) => kindOf(v) !== "audio");
+  const href = (id?: string) => (id ? `/events/${e.id}?v=${id}` : `/events/${e.id}`);
+  // File names, except one that merely repeats the event title (a file placed directly in a category).
+  const files = [...e.videos]
+    .sort((a, b) => Number(kindOf(b) === type) - Number(kindOf(a) === type))
+    .filter((v) => v.title !== e.title);
   return (
-    <Link
-      href={first ? `/events/${e.id}?v=${first.id}` : `/events/${e.id}`}
-      className="group block overflow-hidden rounded-2xl border border-line bg-surface transition hover:-translate-y-0.5 hover:border-gold/60 hover:shadow-[0_10px_40px_-10px_#e3b45a40]"
-    >
-      <div className="relative aspect-video overflow-hidden bg-surface-2">
-        <Thumbnail fileId={cover?.id} emoji={main.emoji} alt={e.title} />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent" />
-        <span className="absolute inset-0 m-auto grid h-14 w-14 place-items-center rounded-full bg-gold/90 text-2xl text-bg opacity-0 transition group-hover:opacity-100">
-          ▶
-        </span>
-        <span className="absolute bottom-2 left-2 rounded-md bg-black/70 px-2 py-0.5 text-xs">
-          {mediaCount(e.videos)}
-        </span>
-        {isNew(e) && <span className="absolute top-2 right-2 rounded-md bg-gold px-2 py-0.5 text-xs font-bold text-bg">חדש</span>}
-      </div>
-      <div className="p-4">
-        <p className="text-xs text-muted">{formatEventDate(e)}</p>
-        <h3 className="mt-1 line-clamp-2 text-lg font-semibold leading-snug">{e.title}</h3>
+    <article className="group overflow-hidden rounded-2xl border border-line bg-surface transition hover:-translate-y-0.5 hover:border-gold/60 hover:shadow-[0_10px_40px_-10px_#e3b45a40]">
+      <Link href={href(first?.id)} className="block">
+        <div className="relative aspect-video overflow-hidden bg-surface-2">
+          <Thumbnail fileId={cover?.id} emoji={main.emoji} alt={e.title} />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent" />
+          <span className="absolute inset-0 m-auto grid h-14 w-14 place-items-center rounded-full bg-gold/90 text-2xl text-bg opacity-0 transition group-hover:opacity-100">
+            ▶
+          </span>
+          <span className="absolute bottom-2 left-2 rounded-md bg-black/70 px-2 py-0.5 text-xs">{mediaCount(e.videos)}</span>
+          {isNew(e) && <span className="absolute top-2 right-2 rounded-md bg-gold px-2 py-0.5 text-xs font-bold text-bg">חדש</span>}
+        </div>
+        <div className="px-4 pt-4">
+          <p className="text-xs text-muted">{formatEventDate(e)}</p>
+          <h3 className="mt-1 line-clamp-2 text-lg font-semibold leading-snug">{e.title}</h3>
+        </div>
+      </Link>
+      <div className="px-4 pb-4">
+        {files.length > 0 && (
+          <ul className="mt-2 space-y-0.5 text-sm" aria-label="קבצים">
+            {files.slice(0, FILES_SHOWN).map((v) => (
+              <li key={v.id}>
+                <Link href={href(v.id)} className="flex items-baseline gap-1.5 text-muted hover:text-gold">
+                  <span aria-hidden className="text-xs">
+                    {KIND_ICON[kindOf(v)]}
+                  </span>
+                  <span className="line-clamp-1">{v.title}</span>
+                </Link>
+              </li>
+            ))}
+            {files.length > FILES_SHOWN && (
+              <li>
+                <Link href={href()} className="text-xs text-gold hover:underline">
+                  +{files.length - FILES_SHOWN} נוספים
+                </Link>
+              </li>
+            )}
+          </ul>
+        )}
         <div className="mt-3 flex flex-wrap gap-1.5">
           {e.categories.map((c) => (
             <span key={c} className="rounded-full bg-surface-2 px-2 py-0.5 text-xs text-muted">
               {categoryInfo(c).emoji} {categoryInfo(c).label}
             </span>
           ))}
+          {e.subcategory && e.subcategory !== e.title && (
+            <span className="rounded-full bg-surface-2 px-2 py-0.5 text-xs text-muted">{e.subcategory}</span>
+          )}
         </div>
       </div>
-    </Link>
+    </article>
   );
 }
