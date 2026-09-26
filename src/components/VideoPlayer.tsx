@@ -1,38 +1,94 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState, useSyncExternalStore } from "react";
 import { driveFileUrl, embedUrl, mediaUrl, thumbnailUrl } from "@/lib/format";
-import type { EventVideo } from "@/lib/types";
+import { type EventVideo, kindOf } from "@/lib/types";
 import { Thumbnail } from "./Thumbnail";
 
 function formatSize(bytes: number) {
   return bytes ? `${(bytes / 1_048_576).toFixed(bytes > 100 * 1_048_576 ? 0 : 1)} MB` : "";
 }
 
+// Phones: small screens or touch-only devices.
+const MOBILE_QUERY = "(max-width: 767px), (hover: none) and (pointer: coarse)";
+function useIsMobile(): boolean {
+  return useSyncExternalStore(
+    (onChange) => {
+      const mq = window.matchMedia(MOBILE_QUERY);
+      mq.addEventListener("change", onChange);
+      return () => mq.removeEventListener("change", onChange);
+    },
+    () => window.matchMedia(MOBILE_QUERY).matches,
+    () => false,
+  );
+}
+
+/** Full screen (and landscape where the phone allows it); silently skipped where unsupported (iPhone). */
+function enterFullscreen(el: HTMLElement | null) {
+  const target = el as (HTMLElement & { webkitRequestFullscreen?: () => void }) | null;
+  try {
+    const done = target?.requestFullscreen?.() ?? target?.webkitRequestFullscreen?.();
+    Promise.resolve(done)
+      .then(() => (screen.orientation as ScreenOrientation & { lock?: (o: string) => Promise<void> }).lock?.("landscape"))
+      .catch(() => {});
+  } catch {}
+}
+
 /**
- * Plays with the browser's own <video>/<audio>, streamed through the site (or from Blob). Drive's
+ * On computers: plays with the browser's own <video>/<audio>, streamed through the site (or from Blob). Drive's
  * embedded player needs third-party cookies, which phones block, so it showed a black screen there.
  * Formats the browser can't play (e.g. .3gp) fall back to the Drive player automatically.
+ * On phones, videos use the Drive player: a poster with a play button first, and tapping it
+ * opens the player in full screen.
  */
 export function VideoPlayer({ videos, emoji }: { videos: EventVideo[]; emoji: string }) {
   const params = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
   const [useDrivePlayer, setUseDrivePlayer] = useState<Set<string>>(new Set());
+  const [startedId, setStartedId] = useState<string | null>(null);
+  const frame = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
   const current = videos.find((v) => v.id === params.get("v")) ?? videos[0];
   if (!current) return <p className="text-muted">אין עדיין סרטונים באירוע הזה.</p>;
 
   const select = (id: string) => router.replace(`${pathname}?v=${id}`, { scroll: false });
   const fallBack = () => setUseDrivePlayer((prev) => new Set(prev).add(current.id));
   const src = current.url ?? mediaUrl(current.id);
-  const native = !useDrivePlayer.has(current.id);
+  const mobileVideo = isMobile && kindOf(current) === "video";
+  const native = !mobileVideo && !useDrivePlayer.has(current.id);
+  const start = () => {
+    enterFullscreen(frame.current);
+    setStartedId(current.id);
+  };
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
       <div>
-        <div className="relative aspect-video overflow-hidden rounded-2xl border border-line bg-black shadow-2xl">
-          {current.kind === "image" ? (
+        <div
+          ref={frame}
+          className="relative aspect-video overflow-hidden rounded-2xl border border-line bg-black shadow-2xl [&:fullscreen]:rounded-none [&:fullscreen]:border-0"
+        >
+          {mobileVideo && startedId !== current.id ? (
+            <button
+              key={`poster-${current.id}`}
+              onClick={start}
+              aria-label={`ניגון ${current.title} במסך מלא`}
+              className="group absolute inset-0 h-full w-full"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element -- Drive thumbnail */}
+              <img
+                src={thumbnailUrl(current.id, 1280)}
+                alt=""
+                referrerPolicy="no-referrer"
+                className="absolute inset-0 h-full w-full object-contain"
+              />
+              <span className="absolute inset-0 m-auto grid h-16 w-16 place-items-center rounded-full bg-gold/90 text-3xl text-bg shadow-xl transition group-active:scale-95">
+                ▶
+              </span>
+            </button>
+          ) : current.kind === "image" ? (
             // eslint-disable-next-line @next/next/no-img-element -- Drive renders (and converts, e.g. HEIC) the image
             <img
               key={current.id}
