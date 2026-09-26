@@ -10,8 +10,6 @@ export default async function Home() {
   const media = events.flatMap((e) => e.videos);
   const audio = media.filter((m) => m.kind === "audio").length;
   const categories = new Set(events.flatMap((e) => e.categories)).size;
-  const years = events.map((e) => Number(e.date.slice(0, 4)));
-  const span = years.length ? `${Math.min(...years)}–${Math.max(...years)}` : "";
 
 
   return (
@@ -34,7 +32,6 @@ export default async function Home() {
               [media.length - audio, "סרטונים"],
               ...(audio ? [[audio, "הקלטות"]] : []),
               [categories, "קטגוריות"],
-              [span, "שנים"],
             ].map(([value, label]) => (
               <div key={label}>
                 <dt className="text-sm text-muted">{label}</dt>
