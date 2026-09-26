@@ -1,16 +1,14 @@
 import { fetchDriveMedia } from "@/lib/drive";
 import { getPublicEvents } from "@/lib/events";
 
-export const maxDuration = 60;
+export const maxDuration = 300; // long videos are streamed in one response
 
-// Vercel Functions can't return more than 4.5 MB per response, so every answer is a partial one
-// (206) of at most this size; <video>/<audio> then ask for the next range by themselves.
-const CHUNK = 4 * 1024 * 1024;
 
 /**
  * Serves a Drive video/recording from the site's own domain. Phones (iPhone Safari especially)
  * showed a black screen with Drive's embedded player and refuse Drive's direct links cross-site;
- * a same-origin stream with range support plays everywhere.
+ * a same-origin stream with range support plays everywhere. The requested range is sent in full
+ * (streamed, so the 4.5 MB body limit doesn't apply): Safari won't play shorter answers.
  */
 export async function GET(request: Request, ctx: RouteContext<"/api/media/[id]">) {
   const { id } = await ctx.params;
@@ -20,8 +18,7 @@ export async function GET(request: Request, ctx: RouteContext<"/api/media/[id]">
 
   const m = request.headers.get("range")?.match(/^bytes=(\d*)-(\d*)$/);
   const start = m?.[1] ? Number(m[1]) : 0;
-  const askedEnd = m?.[2] ? Number(m[2]) : Infinity;
-  const end = Math.min(askedEnd, start + CHUNK - 1);
+  const end = m?.[2] ?? "";
 
   let upstream: Response;
   try {
