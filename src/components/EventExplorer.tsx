@@ -173,7 +173,7 @@ export function EventExplorer({ events }: { events: EventItem[] }) {
   return (
     <section id="events" className="mx-auto max-w-7xl scroll-mt-16 px-4 pb-16 pt-6">
       {/* Text & dates */}
-      <div className="z-20 -mx-4 border-b border-line bg-bg/95 px-4 py-4 md:sticky md:top-[61px]">
+      <div className="z-20 -mx-4 border-b border-line bg-bg/95 px-4 py-4 md:sticky md:top-[63px]">
         <div className="flex flex-col gap-3 md:flex-row md:items-end">
           <label className="flex-1">
             <span className="mb-1 block text-xs text-muted">חיפוש בכותרת או בשם שיר</span>
