@@ -335,6 +335,10 @@ function EventCard({ event: e, type }: { event: EventItem; type: TypeFilter }) {
           </span>
           <span className="absolute bottom-2 left-2 rounded-md bg-black/70 px-2 py-0.5 text-xs">{mediaCount(e.videos)}</span>
           {isNew(e) && <span className="absolute top-2 right-2 rounded-md bg-gold px-2 py-0.5 text-xs font-bold text-bg">חדש</span>}
+          <span className="absolute top-2 left-2 max-w-[70%] truncate rounded-md bg-black/70 px-2 py-0.5 text-xs">
+            {main.emoji} {main.label}
+            {e.subcategory && e.subcategory !== e.title && ` · ${e.subcategory}`}
+          </span>
         </div>
         <div className="px-4 pt-4">
           <p className="text-xs text-muted">{formatEventDate(e)}</p>
@@ -363,16 +367,6 @@ function EventCard({ event: e, type }: { event: EventItem; type: TypeFilter }) {
             )}
           </ul>
         )}
-        <div className="mt-3 flex flex-wrap gap-1.5">
-          {e.categories.map((c) => (
-            <span key={c} className="rounded-full bg-surface-2 px-2 py-0.5 text-xs text-muted">
-              {categoryInfo(c).emoji} {categoryInfo(c).label}
-            </span>
-          ))}
-          {e.subcategory && e.subcategory !== e.title && (
-            <span className="rounded-full bg-surface-2 px-2 py-0.5 text-xs text-muted">{e.subcategory}</span>
-          )}
-        </div>
       </div>
     </article>
   );
