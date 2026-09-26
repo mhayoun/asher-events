@@ -39,8 +39,8 @@ function enterFullscreen(el: HTMLElement | null) {
  * On computers: plays with the browser's own <video>/<audio>, streamed through the site (or from Blob). Drive's
  * embedded player needs third-party cookies, which phones block, so it showed a black screen there.
  * Formats the browser can't play (e.g. .3gp) fall back to the Drive player automatically.
- * On phones, videos use the Drive player: a poster with a play button first, and tapping it
- * opens the player in full screen.
+ * On phones, videos use the Drive player: a poster with a play button loads it in the page,
+ * then a "full screen" button is offered (never forced).
  */
 export function VideoPlayer({ videos, emoji }: { videos: EventVideo[]; emoji: string }) {
   const params = useSearchParams();
@@ -58,10 +58,7 @@ export function VideoPlayer({ videos, emoji }: { videos: EventVideo[]; emoji: st
   const src = current.url ?? mediaUrl(current.id);
   const mobileVideo = isMobile && kindOf(current) === "video";
   const native = !mobileVideo && !useDrivePlayer.has(current.id);
-  const start = () => {
-    enterFullscreen(frame.current);
-    setStartedId(current.id);
-  };
+  const started = startedId === current.id;
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
@@ -70,11 +67,11 @@ export function VideoPlayer({ videos, emoji }: { videos: EventVideo[]; emoji: st
           ref={frame}
           className="relative aspect-video overflow-hidden rounded-2xl border border-line bg-black shadow-2xl [&:fullscreen]:rounded-none [&:fullscreen]:border-0"
         >
-          {mobileVideo && startedId !== current.id ? (
+          {mobileVideo && !started ? (
             <button
               key={`poster-${current.id}`}
-              onClick={start}
-              aria-label={`ניגון ${current.title} במסך מלא`}
+              onClick={() => setStartedId(current.id)}
+              aria-label={`ניגון ${current.title}`}
               className="group absolute inset-0 h-full w-full"
             >
               {/* eslint-disable-next-line @next/next/no-img-element -- Drive thumbnail */}
@@ -129,6 +126,14 @@ export function VideoPlayer({ videos, emoji }: { videos: EventVideo[]; emoji: st
         <div className="mt-3 flex items-center justify-between gap-4">
           <h2 className="text-xl font-semibold">{current.title}</h2>
           <div className="flex shrink-0 flex-col items-end gap-1 text-sm">
+            {mobileVideo && started && (
+              <button
+                onClick={() => enterFullscreen(frame.current)}
+                className="rounded-full border border-gold px-3 py-1 font-semibold text-gold"
+              >
+                ⛶ מסך מלא
+              </button>
+            )}
             {native && current.kind !== "image" && (
               <button onClick={fallBack} className="text-muted hover:text-gold">
                 לא מתנגן? נגן חלופי
