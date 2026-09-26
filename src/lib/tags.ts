@@ -14,6 +14,21 @@ const PHRASES: { label: string; re: RegExp }[] = [
   { label: "גבעת זאב", re: /גבעת[\s-]+ז[אע]ב/g }, // also the "גבעת זעב" spelling used in one folder
   { label: "ברית מילה", re: /ברית[\s-]+מילה/g },
   { label: "שבע ברכות", re: /שבע[\s-]+ברכות/g },
+  // people
+  { label: "אשר חיון", re: /אשר[\s-]+חיון|\basher\b/gi },
+  { label: "אבי בריז", re: /אבי[\s-]+בריז/g },
+  { label: "דוד מחמלי", re: /דוד[\s-]+מחמלי/g },
+  { label: "אברהם קס", re: /אברהם[\s-]+קס/g },
+  { label: "רב פיטוסי", re: /רב[\s-]+פיטוסי/g },
+  // places and institutions
+  { label: "מענה שמחה", re: /מענה[\s-]+שמחה/g },
+  { label: "בית אהרון", re: /בית[\s-]+אהרו?ן/g },
+  { label: "מושב אלמוג", re: /מושב[\s-]+אלמוג/g },
+  { label: "מלון שלום", re: /מלון[\s-]+שלום/g },
+  { label: "ישיבת תורה מציון", re: /ישיבת[\s-]+תורה[\s-]+מציון/g },
+  // other expressions
+  { label: "ילד הפלא", re: /ילד[\s-]+ה?פלא/g },
+  { label: 'סיום הש"ס', re: /סיום[\s-]+ה?ש["״]?ס/g },
 ];
 
 export interface Tag {
@@ -31,7 +46,8 @@ export function titleWords(e: EventItem): Map<string, string> {
         words.set(normalize(label), label);
         title = title.replace(re, " ");
       }
-    for (const raw of title.split(/[\s_\-–.+,()|/]+/)) {
+    // digits glued to words ("סוכות2021") are cut off so the word still counts
+    for (const raw of title.replace(/\d+/g, " ").split(/[\s_\-–.+,()|/]+/)) {
       const word = raw.replace(/^["'׳״]+|["'׳״]+$/g, "");
       const id = normalize(word);
       if (id.length < 3 || /^\d+$/.test(id) || STOP_WORDS.has(id)) continue;
@@ -45,7 +61,7 @@ export function titleWords(e: EventItem): Map<string, string> {
  * Tag cloud of the given events, most frequent first. Words found in every event are left out
  * (they can't narrow the list), except when there is a single event.
  */
-export function tagCloud(events: EventItem[], max = 40): Tag[] {
+export function tagCloud(events: EventItem[], max = 60): Tag[] {
   const tags = new Map<string, Tag>();
   for (const e of events)
     for (const [id, label] of titleWords(e)) {
