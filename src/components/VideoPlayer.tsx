@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useRef, useState, useSyncExternalStore } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { driveFileUrl, embedUrl, mediaUrl, thumbnailUrl } from "@/lib/format";
 import { type EventVideo, kindOf } from "@/lib/types";
 import { Thumbnail } from "./Thumbnail";
@@ -24,23 +24,12 @@ function useIsMobile(): boolean {
   );
 }
 
-/** Full screen (and landscape where the phone allows it); silently skipped where unsupported (iPhone). */
-function enterFullscreen(el: HTMLElement | null) {
-  const target = el as (HTMLElement & { webkitRequestFullscreen?: () => void }) | null;
-  try {
-    const done = target?.requestFullscreen?.() ?? target?.webkitRequestFullscreen?.();
-    Promise.resolve(done)
-      .then(() => (screen.orientation as ScreenOrientation & { lock?: (o: string) => Promise<void> }).lock?.("landscape"))
-      .catch(() => {});
-  } catch {}
-}
-
 /**
  * On computers: plays with the browser's own <video>/<audio>, streamed through the site (or from Blob). Drive's
  * embedded player needs third-party cookies, which phones block, so it showed a black screen there.
  * Formats the browser can't play (e.g. .3gp) fall back to the Drive player automatically.
  * On phones, videos use the Drive player: a poster with a play button loads it in the page,
- * then a "full screen" button is offered (never forced).
+ * with a hint to use the player's own full-screen button.
  */
 export function VideoPlayer({ videos, emoji }: { videos: EventVideo[]; emoji: string }) {
   const params = useSearchParams();
@@ -48,7 +37,6 @@ export function VideoPlayer({ videos, emoji }: { videos: EventVideo[]; emoji: st
   const pathname = usePathname();
   const [useDrivePlayer, setUseDrivePlayer] = useState<Set<string>>(new Set());
   const [startedId, setStartedId] = useState<string | null>(null);
-  const frame = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
   const current = videos.find((v) => v.id === params.get("v")) ?? videos[0];
   if (!current) return <p className="text-muted">אין עדיין סרטונים באירוע הזה.</p>;
@@ -64,8 +52,7 @@ export function VideoPlayer({ videos, emoji }: { videos: EventVideo[]; emoji: st
     <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
       <div>
         <div
-          ref={frame}
-          className="relative aspect-video overflow-hidden rounded-2xl border border-line bg-black shadow-2xl [&:fullscreen]:rounded-none [&:fullscreen]:border-0"
+          className="relative aspect-video overflow-hidden rounded-2xl border border-line bg-black shadow-2xl"
         >
           {mobileVideo && !started ? (
             <button
@@ -126,14 +113,7 @@ export function VideoPlayer({ videos, emoji }: { videos: EventVideo[]; emoji: st
         <div className="mt-3 flex items-center justify-between gap-4">
           <h2 className="text-xl font-semibold">{current.title}</h2>
           <div className="flex shrink-0 flex-col items-end gap-1 text-sm">
-            {mobileVideo && started && (
-              <button
-                onClick={() => enterFullscreen(frame.current)}
-                className="rounded-full border border-gold px-3 py-1 font-semibold text-gold"
-              >
-                ⛶ מסך מלא
-              </button>
-            )}
+            {mobileVideo && started && <p className="text-muted">למסך מלא: לחצו על ⛶ בתוך הנגן</p>}
             {native && current.kind !== "image" && (
               <button onClick={fallBack} className="text-muted hover:text-gold">
                 לא מתנגן? נגן חלופי
