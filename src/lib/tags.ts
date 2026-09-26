@@ -8,6 +8,12 @@ const STOP_WORDS = new Set(
   ),
 );
 
+// Expressions kept whole in the cloud instead of being split into words (spelling variants included).
+const PHRASES: { label: string; re: RegExp }[] = [
+  { label: "בר מצוה", re: /בר[\s-]*מצו{1,2}ה/g }, // בר מצוה / בר מצווה / בר-מצוה
+  { label: "גבעת זאב", re: /גבעת[\s-]+ז[אע]ב/g }, // also the "גבעת זעב" spelling used in one folder
+];
+
 export interface Tag {
   id: string; // normalized word, used for matching and in ?tags=
   label: string; // the word as written in the titles
@@ -17,13 +23,19 @@ export interface Tag {
 /** Words of an event's title and of its files' titles: normalized form → a readable form. */
 export function titleWords(e: EventItem): Map<string, string> {
   const words = new Map<string, string>();
-  for (const title of [e.title, ...e.videos.map((v) => v.title)])
+  for (let title of [e.title, ...e.videos.map((v) => v.title)]) {
+    for (const { label, re } of PHRASES)
+      if (title.match(re)) {
+        words.set(normalize(label), label);
+        title = title.replace(re, " ");
+      }
     for (const raw of title.split(/[\s_\-–.+,()|/]+/)) {
       const word = raw.replace(/^["'׳״]+|["'׳״]+$/g, "");
       const id = normalize(word);
       if (id.length < 3 || /^\d+$/.test(id) || STOP_WORDS.has(id)) continue;
       if (!words.has(id)) words.set(id, word);
     }
+  }
   return words;
 }
 
