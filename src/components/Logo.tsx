@@ -25,12 +25,9 @@ export function LogoMark({ className = "h-9 w-auto" }: { className?: string }) {
 
 export function Logo() {
   return (
-    <span className="flex items-center gap-2.5">
+    <span className="flex items-center gap-2">
       <LogoMark />
-      <span className="flex flex-col leading-none">
-        <span className="font-display text-xl font-black text-gold">אשר חיון</span>
-        <span className="mt-1 text-[0.65rem] tracking-[0.25em] text-muted">סטודיו למוזיקה</span>
-      </span>
+      <span className="whitespace-nowrap font-display text-xl font-black leading-none text-gold">אשר חיון</span>
     </span>
   );
 }
