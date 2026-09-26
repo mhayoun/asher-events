@@ -22,7 +22,7 @@ function save(password: string | null) {
   } catch {}
 }
 
-/** Header button for the teacher: checks Drive now and refreshes the site. Password-protected. */
+/** Footer button for the teacher: checks Drive now and refreshes the site. Password-protected. */
 export function SyncButton() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -69,7 +69,7 @@ export function SyncButton() {
   }
 
   return (
-    <div className="relative">
+    <div className="relative inline-block">
       <button
         onClick={toggle}
         aria-expanded={open}
@@ -84,7 +84,7 @@ export function SyncButton() {
       {open && (
         <form
           onSubmit={sync}
-          className="absolute left-0 top-full z-40 mt-2 w-72 rounded-2xl border border-line bg-surface p-4 shadow-2xl"
+          className="absolute bottom-full left-1/2 z-40 mb-2 w-72 -translate-x-1/2 rounded-2xl border border-line bg-surface p-4 text-right shadow-2xl"
         >
           <p className="text-sm text-muted">בדיקה אם נוספו אירועים או קטעים בתיקיית הדרייב, ועדכון האתר מיד.</p>
           <label className="mt-3 block">
