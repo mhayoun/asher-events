@@ -10,7 +10,7 @@ import { type EventItem, kindOf, type MediaKind } from "@/lib/types";
 import { Thumbnail } from "./Thumbnail";
 
 type TypeFilter = MediaKind | "all";
-type Filters = { q: string; type: TypeFilter; cat: string; sub: string; tags: string[]; from: string; to: string };
+type Filters = { q: string; type: TypeFilter; cat: string; sub: string; tags: string[] };
 
 const TYPES: { id: TypeFilter; label: string; emoji: string }[] = [
   { id: "all", label: "הכל", emoji: "✨" },
@@ -19,10 +19,6 @@ const TYPES: { id: TypeFilter; label: string; emoji: string }[] = [
   { id: "image", label: "תמונות", emoji: "🖼️" },
 ];
 const isType = (t: string | null): t is MediaKind => t === "video" || t === "audio" || t === "image";
-
-function eventRange(e: EventItem): [string, string] {
-  return e.datePrecision === "year" ? [`${e.date.slice(0, 4)}-01-01`, `${e.date.slice(0, 4)}-12-31`] : [e.date, e.date];
-}
 
 function searchText(e: EventItem): string {
   return normalize(
@@ -36,7 +32,7 @@ function searchText(e: EventItem): string {
 function FilterBox({ title, label, children }: { title: string; label: string; children: React.ReactNode }) {
   return (
     <div className="rounded-2xl border border-line bg-surface/60 p-4">
-      <p className="mb-2 text-xs font-semibold tracking-wide text-muted">{title}</p>
+      <p className="mb-3 text-lg font-semibold">{title}</p>
       <div className="flex flex-wrap items-baseline gap-2" role="group" aria-label={label}>
         {children}
       </div>
@@ -45,7 +41,7 @@ function FilterBox({ title, label, children }: { title: string; label: string; c
 }
 
 const chip = (on: boolean) =>
-  `flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm transition disabled:cursor-default disabled:opacity-40 ${
+  `flex items-center gap-1.5 rounded-full border px-4 py-2 text-base transition disabled:cursor-default disabled:opacity-40 ${
     on ? "border-gold bg-gold-soft text-gold" : "border-line bg-surface hover:border-gold/60"
   }`;
 
@@ -67,8 +63,6 @@ export function EventExplorer({ events }: { events: EventItem[] }) {
     cat: params.get("cat") ?? "",
     sub: params.get("sub") ?? "",
     tags: params.get("tags")?.split(",").filter(Boolean) ?? [],
-    from: params.get("from") ?? "",
-    to: params.get("to") ?? "",
   };
 
   function update(next: Partial<Filters>) {
@@ -79,8 +73,6 @@ export function EventExplorer({ events }: { events: EventItem[] }) {
     if (merged.cat) sp.set("cat", merged.cat);
     if (merged.cat && merged.sub) sp.set("sub", merged.sub);
     if (merged.tags.length) sp.set("tags", merged.tags.join(","));
-    if (merged.from) sp.set("from", merged.from);
-    if (merged.to) sp.set("to", merged.to);
     const qs = sp.toString();
     router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
   }
@@ -98,17 +90,11 @@ export function EventExplorer({ events }: { events: EventItem[] }) {
     [events],
   );
 
-  // Step 1: text and dates.
+  // Step 1: text.
   const searched = useMemo(() => {
     const terms = normalize(f.q).split(" ").filter(Boolean);
-    return indexed.filter(({ e, text }) => {
-      if (terms.length && !terms.every((t) => text.includes(t))) return false;
-      const [start, end] = eventRange(e);
-      if (f.from && end < f.from) return false;
-      if (f.to && start > f.to) return false;
-      return true;
-    });
-  }, [indexed, f.q, f.from, f.to]);
+    return terms.length ? indexed.filter(({ text }) => terms.every((t) => text.includes(t))) : indexed;
+  }, [indexed, f.q]);
 
   // Step 2: media type (events holding at least one item of that type).
   const typeCounts = useMemo(() => {
@@ -164,7 +150,7 @@ export function EventExplorer({ events }: { events: EventItem[] }) {
   }, [results, f.tags, indexed]);
   const [minCount, maxCount] = tags.length ? [Math.min(...tags.map((t) => t.count)), Math.max(...tags.map((t) => t.count))] : [1, 1];
 
-  const hasFilters = Boolean(f.q || f.type !== "all" || f.cat || f.tags.length || f.from || f.to);
+  const hasFilters = Boolean(f.q || f.type !== "all" || f.cat || f.tags.length);
   const pickCategory = (id: string) => update({ cat: f.cat === id ? "" : id, sub: "", tags: [] });
   const pickSub = (id: string) => update({ sub: id, tags: [] });
   const subs = Object.keys(subCounts).sort((a, b) => a.localeCompare(b, "he"));
@@ -172,42 +158,18 @@ export function EventExplorer({ events }: { events: EventItem[] }) {
 
   return (
     <section id="events" className="mx-auto max-w-7xl scroll-mt-16 px-4 pb-16 pt-6">
-      {/* Text & dates */}
+      {/* Text */}
       <div className="z-20 -mx-4 border-b border-line bg-bg/95 px-4 py-4 md:sticky md:top-[57px]">
-        <div className="flex flex-col gap-3 md:flex-row md:items-end">
-          <label className="flex-1">
-            <span className="mb-1 block text-xs text-muted">חיפוש בכותרת או בשם שיר</span>
-            <input
-              type="search"
-              value={f.q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="לדוגמה: ברית, קזבלנקה, גבעת זאב..."
-              className="w-full rounded-xl border border-line bg-surface px-4 py-2.5 outline-none placeholder:text-muted/60 focus:border-gold"
-            />
-          </label>
-          <div className="grid grid-cols-2 gap-2 md:flex">
-            <label>
-              <span className="mb-1 block text-xs text-muted">מתאריך</span>
-              <input
-                type="date"
-                value={f.from}
-                max={f.to || undefined}
-                onChange={(e) => update({ from: e.target.value })}
-                className="w-full rounded-xl border border-line bg-surface px-3 py-2.5 outline-none focus:border-gold"
-              />
-            </label>
-            <label>
-              <span className="mb-1 block text-xs text-muted">עד תאריך</span>
-              <input
-                type="date"
-                value={f.to}
-                min={f.from || undefined}
-                onChange={(e) => update({ to: e.target.value })}
-                className="w-full rounded-xl border border-line bg-surface px-3 py-2.5 outline-none focus:border-gold"
-              />
-            </label>
-          </div>
-        </div>
+        <label className="block">
+          <span className="mb-2 block text-lg font-semibold">חיפוש בכותרת או בשם שיר</span>
+          <input
+            type="search"
+            value={f.q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="לדוגמה: ברית, קזבלנקה, גבעת זאב..."
+            className="w-full rounded-xl border border-line bg-surface px-4 py-2.5 outline-none placeholder:text-muted/60 focus:border-gold"
+          />
+        </label>
       </div>
 
       <div className="mt-5 space-y-3">
@@ -222,7 +184,7 @@ export function EventExplorer({ events }: { events: EventItem[] }) {
             >
               <span aria-hidden>{t.emoji}</span>
               {t.label}
-              <span className="text-xs text-muted">{typeCounts[t.id]}</span>
+              <span className="text-sm text-muted">{typeCounts[t.id]}</span>
             </button>
           ))}
         </FilterBox>
@@ -232,7 +194,7 @@ export function EventExplorer({ events }: { events: EventItem[] }) {
             <button key={c.id} onClick={() => pickCategory(c.id)} aria-pressed={f.cat === c.id} className={chip(f.cat === c.id)}>
               <span aria-hidden>{c.emoji}</span>
               {c.label}
-              <span className="text-xs text-muted">{catCounts[c.id] ?? 0}</span>
+              <span className="text-sm text-muted">{catCounts[c.id] ?? 0}</span>
             </button>
           ))}
         </FilterBox>
@@ -241,12 +203,12 @@ export function EventExplorer({ events }: { events: EventItem[] }) {
           <FilterBox title={`תת-קטגוריה ב${categoryInfo(f.cat).label}`} label="תת-קטגוריות">
             <button onClick={() => pickSub("")} aria-pressed={!f.sub} className={chip(!f.sub)}>
               הכל
-              <span className="text-xs text-muted">{inCategory.length}</span>
+              <span className="text-sm text-muted">{inCategory.length}</span>
             </button>
             {subs.map((id) => (
               <button key={id} onClick={() => pickSub(id)} aria-pressed={f.sub === id} className={chip(f.sub === id)}>
                 {id}
-                <span className="text-xs text-muted">{subCounts[id]}</span>
+                <span className="text-sm text-muted">{subCounts[id]}</span>
               </button>
             ))}
           </FilterBox>
@@ -266,7 +228,7 @@ export function EventExplorer({ events }: { events: EventItem[] }) {
                   onClick={() => toggleTag(t.id)}
                   aria-pressed={on}
                   title={`${t.count} אירועים`}
-                  style={{ fontSize: `${0.8 + weight * 0.7}rem`, opacity: on ? 1 : 0.55 + weight * 0.45 }}
+                  style={{ fontSize: `${1 + weight * 0.8}rem`, opacity: on ? 1 : 0.55 + weight * 0.45 }}
                   className={`rounded-lg px-1.5 leading-tight transition hover:text-gold ${
                     on ? "bg-gold-soft font-semibold text-gold ring-1 ring-gold" : ""
                   }`}
@@ -279,7 +241,7 @@ export function EventExplorer({ events }: { events: EventItem[] }) {
         )}
       </div>
 
-      <div className="mt-5 flex items-center justify-between text-sm text-muted">
+      <div className="mt-5 flex items-center justify-between text-base text-muted">
         <span>
           נמצאו {results.length} אירועים · {mediaCount(results.flatMap((e) => e.videos))}
         </span>
@@ -287,7 +249,7 @@ export function EventExplorer({ events }: { events: EventItem[] }) {
           <button
             onClick={() => {
               setQ("");
-              update({ q: "", type: "all", cat: "", sub: "", tags: [], from: "", to: "" });
+              update({ q: "", type: "all", cat: "", sub: "", tags: [] });
             }}
             className="text-gold hover:underline"
           >
@@ -297,7 +259,7 @@ export function EventExplorer({ events }: { events: EventItem[] }) {
       </div>
 
       {results.length === 0 ? (
-        <p className="py-20 text-center text-muted">לא נמצאו אירועים. נסו מילה אחרת או טווח תאריכים רחב יותר.</p>
+        <p className="py-20 text-center text-muted">לא נמצאו אירועים. נסו מילה אחרת או סינון רחב יותר.</p>
       ) : (
         <ul className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {results.map((e) => (
