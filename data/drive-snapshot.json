@@ -310,6 +310,56 @@
    ]
   },
   {
+   "id": "1jpQ-iFpnXl3J0zYIjf4YekffOmQqUUI0",
+   "name": "חוג שירה עם כלי נגינה לקבוצת ילדים בגילו - 2021",
+   "category": "מקהלת ילדים",
+   "subcategory": "חוג שירה עם כלי נגינה לקבוצת ילדים בגילו - 2021",
+   "createdTime": "2026-10-20T12:00:00.000Z",
+   "modifiedTime": "2026-10-20T12:00:00.000Z",
+   "videos": [
+    {
+     "id": "1MjHcAfnxFXO9sfJfhoxJcippYHgNwE-9",
+     "name": "image01.jpg",
+     "mimeType": "image/jpeg",
+     "createdTime": "2026-10-20T12:00:00.000Z",
+     "modifiedTime": "2026-10-20T12:00:00.000Z",
+     "size": "473004"
+    },
+    {
+     "id": "1Th21g0AsKqHuTqhpcHBZiwFNAOJluSG3",
+     "name": "image02.jpg",
+     "mimeType": "image/jpeg",
+     "createdTime": "2026-10-20T12:00:00.000Z",
+     "modifiedTime": "2026-10-20T12:00:00.000Z",
+     "size": "752038"
+    },
+    {
+     "id": "1qlgg_QF8W5ACx-NeTLlNbXZZzqF0uWov",
+     "name": "video-2021-06-15-14-02-45.mp4",
+     "mimeType": "video/mp4",
+     "createdTime": "2022-03-26T12:00:00.000Z",
+     "modifiedTime": "2022-03-26T12:00:00.000Z",
+     "size": "86278479"
+    },
+    {
+     "id": "1yo29iEaq1eYTsa2T0y5KdK2RZdqySrD6",
+     "name": "video-2021-06-15-14-20-15.mp4",
+     "mimeType": "video/mp4",
+     "createdTime": "2022-03-26T12:00:00.000Z",
+     "modifiedTime": "2022-03-26T12:00:00.000Z",
+     "size": "12010317"
+    },
+    {
+     "id": "1HMjpYH8q3RCTCC7yVXAiMdmoUZtw0vRK",
+     "name": "video-2021-06-15-14-22-20.mp4",
+     "mimeType": "video/mp4",
+     "createdTime": "2022-03-26T12:00:00.000Z",
+     "modifiedTime": "2022-03-26T12:00:00.000Z",
+     "size": "20904370"
+    }
+   ]
+  },
+  {
    "id": "1K9w8izm6V3lm7NUolKlcy0tYQDfHk08a",
    "name": "חינה הר נוף",
    "category": "חינה",
