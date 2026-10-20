@@ -1,7 +1,7 @@
 import { revalidateTag } from "next/cache";
 import { isDriveEditor } from "@/lib/auth";
 import { fetchDriveFolders } from "@/lib/drive";
-import { DRIVE_CACHE_TAG, driveSource, getPublicEvents } from "@/lib/events";
+import { DRIVE_CACHE_TAG, driveSource, getPublicEvents, sizeUnknown } from "@/lib/events";
 import { loadEvents, overrides } from "@/lib/store";
 import { mergeEvents } from "@/lib/sync";
 
@@ -16,7 +16,8 @@ export const maxDuration = 60;
 export async function POST(request: Request) {
   if (!(await isDriveEditor(request))) return Response.json({ error: "not allowed" }, { status: 401 });
 
-  const [shown, saved, folders] = await Promise.all([getPublicEvents(), loadEvents(), fetchDriveFolders()]);
+  const saved = await loadEvents();
+  const [shown, folders] = await Promise.all([getPublicEvents(), fetchDriveFolders(undefined, undefined, { sizes: sizeUnknown(saved) })]);
   const fresh = mergeEvents(folders, saved, overrides, driveSource()).events.filter((e) => !e.hidden);
 
   const shownById = new Map(shown.map((e) => [e.id, e]));

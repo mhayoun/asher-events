@@ -179,14 +179,16 @@ export async function fetchDriveMedia(fileId: string, range?: string): Promise<R
 export async function fetchDriveFolders(
   rootId = ROOT_FOLDER_ID,
   cache?: ListingCache,
-  { sizes = false }: { sizes?: boolean } = {},
+  { sizes = false }: { sizes?: boolean | ((fileId: string) => boolean) } = {},
 ): Promise<DriveFolder[]> {
   const auth = hasDriveCredentials() ? await authParams() : null;
   const list = async (id: string) => {
     if (auth) return listChildren(id, auth, cache);
     const children: (Awaited<ReturnType<typeof listPublicChildren>>[number] & { size?: string })[] = await listPublicChildren(id, cache);
-    // One request per file, slow: only the daily sync asks for sizes; pages keep the sizes it saved.
-    if (sizes) await Promise.all(children.filter((f) => isMediaMime(f.mimeType)).map(async (f) => (f.size = await publicSize(f.id, cache))));
+    // One request per file, slow: the daily sync asks for every size; pages keep the sizes it saved
+    // and only ask for those of files added since (sizes is then a filter).
+    const wanted = (f: { id: string; mimeType: string }) => isMediaMime(f.mimeType) && (sizes === true || (!!sizes && sizes(f.id)));
+    await Promise.all(children.filter(wanted).map(async (f) => (f.size = await publicSize(f.id, cache))));
     return children;
   };
   const isFolder = (f: { mimeType: string }) => f.mimeType === FOLDER_MIME;
