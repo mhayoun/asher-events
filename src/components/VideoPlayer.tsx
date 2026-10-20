@@ -2,13 +2,9 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { driveFileUrl, embedUrl, mediaUrl, thumbnailUrl } from "@/lib/format";
+import { driveFileUrl, embedUrl, fileLabel, formatSize, mediaUrl, thumbnailUrl } from "@/lib/format";
 import type { EventVideo } from "@/lib/types";
-import { Thumbnail } from "./Thumbnail";
-
-function formatSize(bytes: number) {
-  return bytes ? `${(bytes / 1_048_576).toFixed(bytes > 100 * 1_048_576 ? 0 : 1)} MB` : "";
-}
+import { PlayBadge, Thumbnail } from "./Thumbnail";
 
 /**
  * Plays with the browser's own <video>/<audio>, streamed through the site (or from Blob). Drive's
@@ -73,7 +69,12 @@ export function VideoPlayer({ videos, emoji }: { videos: EventVideo[]; emoji: st
           )}
         </div>
         <div className="mt-3 flex items-center justify-between gap-4">
-          <h2 className="text-xl font-semibold">{current.title}</h2>
+          <div className="min-w-0">
+            <h2 className="text-xl font-semibold">{current.title}</h2>
+            <p className="mt-0.5 truncate text-sm text-muted" dir="auto">
+              {fileLabel(current)}
+            </p>
+          </div>
           <div className="flex shrink-0 flex-col items-end gap-1 text-sm">
             {native && current.kind !== "image" && (
               <button onClick={fallBack} className="text-muted hover:text-gold">
@@ -100,14 +101,20 @@ export function VideoPlayer({ videos, emoji }: { videos: EventVideo[]; emoji: st
                 }`}
               >
                 <span className="relative aspect-video w-28 shrink-0 overflow-hidden rounded-lg bg-surface-2">
-                  <Thumbnail fileId={v.kind === "audio" ? undefined : v.id} emoji={v.kind === "audio" ? "🎧" : emoji} alt="" width={240} />
-                  {active && <span className="absolute inset-0 grid place-items-center bg-black/50 text-gold">▶</span>}
+                  <Thumbnail
+                    fileId={v.kind === "audio" ? undefined : v.id}
+                    emoji={v.kind === "audio" ? "🎧" : emoji}
+                    alt=""
+                    width={240}
+                    video={!v.kind}
+                  />
+                  {!v.kind && <PlayBadge size="sm" />}
                 </span>
                 <span className="min-w-0">
-                  <span className="block text-xs text-muted">
-                    {[i + 1, formatSize(v.size)].filter(Boolean).join(" · ")}
+                  <span className="block text-xs text-muted">{[i + 1, formatSize(v.size)].filter(Boolean).join(" · ")}</span>
+                  <span className="line-clamp-2 break-all font-medium" dir="auto">
+                    {v.name ?? v.title}
                   </span>
-                  <span className="line-clamp-2 font-medium">{v.title}</span>
                 </span>
               </button>
             </li>

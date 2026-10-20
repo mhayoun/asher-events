@@ -11,7 +11,8 @@
    {
     "id": "1BK2wSyHmKbnDL-J9kFr1q_cHNK8pnhZh",
     "title": "עוד ותוף מרים סוכה 2026",
-    "size": 0,
+    "name": "עוד ותוף מרים סוכה 2026",
+    "size": 9722140,
     "modifiedTime": "2026-10-05T12:00:00.000Z"
    }
   ],
@@ -29,7 +30,8 @@
    {
     "id": "1IY87u2zgRrniiXzCTC5QkRxFrqz7DdvO",
     "title": "עוד וטוף מרים",
-    "size": 0,
+    "name": "עוד וטוף מרים",
+    "size": 9722140,
     "modifiedTime": "2026-10-05T12:00:00.000Z"
    }
   ],
@@ -47,7 +49,8 @@
    {
     "id": "1K9w8izm6V3lm7NUolKlcy0tYQDfHk08a",
     "title": "חינה הר נוף",
-    "size": 0,
+    "name": "חינה הר נוף.mp4",
+    "size": 14648167,
     "modifiedTime": "2026-09-29T12:00:00.000Z"
    }
   ],
@@ -66,7 +69,8 @@
    {
     "id": "14hArKoHWP1CiPfG2NssWq0wJYdKyhzrH",
     "title": "טופים מימונה",
-    "size": 0,
+    "name": "טופים מימונה.mp4",
+    "size": 17128762,
     "modifiedTime": "2026-09-27T12:00:00.000Z"
    }
   ],
@@ -85,7 +89,8 @@
    {
     "id": "1tcfds0YeG_497RzYFNqrq_Y1ZUV1vH4x",
     "title": "asher armonica",
-    "size": 0,
+    "name": "asher_armonica.mp3",
+    "size": 2052964,
     "modifiedTime": "2026-09-26T12:00:00.000Z",
     "kind": "audio"
    }
@@ -105,6 +110,7 @@
    {
     "id": "1KGBNjI1-rtGvIGdtdR88V1DeEnPxNNHX",
     "title": "ברית מילה 1",
+    "name": "ברית מילה 1.mp4",
     "size": 21470720,
     "modifiedTime": "2024-12-30T18:28:40Z"
    }
@@ -124,12 +130,14 @@
    {
     "id": "1o1BqHoq8kjTxqLkpM0dKifjfCQDN7PKX",
     "title": "יברכך הי",
+    "name": "יברכך הי.mp4",
     "size": 22545477,
     "modifiedTime": "2024-08-30T08:56:54Z"
    },
    {
     "id": "1j0TAMMAzQHSFFMHB-n2wt-w21F7QhbcP",
     "title": "תן לי תפילה",
+    "name": "תן לי תפילה.mp4",
     "size": 23698782,
     "modifiedTime": "2024-08-30T09:01:03Z"
    }
@@ -149,25 +157,29 @@
    {
     "id": "19qwEjSzfTEbXrD6Rv0KJs814i3NXQlxl",
     "title": "חזנות",
+    "name": "חזנות.mp4",
     "size": 34253041,
     "modifiedTime": "2024-08-29T15:31:59Z"
    },
    {
     "id": "1BtdYknv6i97ZY6DPe2D8NjTh-GS9fgIG",
     "title": "ילד פלא",
+    "name": "ילד פלא.mp4",
     "size": 9605832,
     "modifiedTime": "2024-08-29T12:41:05Z"
    },
    {
     "id": "1Of_yTDMLHTfVVH-X2Wgew5T6syT6RQ8w",
     "title": "פאנטם",
+    "name": "פאנטם.mp4",
     "size": 29095311,
     "modifiedTime": "2024-08-29T18:19:28Z"
    },
    {
     "id": "1xJx-bILd3ckADQLkkOZP-g_NisBEPQCf",
     "title": "תוף איבו",
-    "size": 390388141,
+    "name": "תוף איבו.mp4",
+    "size": 62194551,
     "modifiedTime": "2024-08-29T10:57:35Z"
    }
   ],
@@ -186,24 +198,28 @@
    {
     "id": "1YzOrH5JXEXm0d7mXHOQ29JES5GXXMM4W",
     "title": "בן אדם",
+    "name": "בן אדם.mp4",
     "size": 20253513,
     "modifiedTime": "2024-08-29T11:27:16.143Z"
    },
    {
     "id": "1aGqZOqL2rfi-Ml9qmB_e-f9_NMtw4aKK",
     "title": "לקרבני אליך",
+    "name": "לקרבני אליך.mp4",
     "size": 21049882,
     "modifiedTime": "2024-08-29T11:26:23.284Z"
    },
    {
     "id": "1VA-DU5Y8-bO7Y5gI01VolFb538wwoqHB",
     "title": "מחרוזת ריקודים",
+    "name": "מחרוזת ריקודים.mp4",
     "size": 37052460,
     "modifiedTime": "2024-08-29T11:27:52.458Z"
    },
    {
     "id": "1FWIUhU-XpuBGlFmJU3gh6cu-N1_dlnrl",
     "title": "שיפכי כמים",
+    "name": "שיפכי כמים.mp4",
     "size": 23491798,
     "modifiedTime": "2024-08-29T11:25:17.728Z"
    }
@@ -223,24 +239,28 @@
    {
     "id": "1T1Z_SvnLkhN0Lirpm3LenJvnwbG9rJ-8",
     "title": "ברצלונה",
+    "name": "ברצלונה.mp4",
     "size": 11783624,
     "modifiedTime": "2024-08-20T07:05:54.119Z"
    },
    {
     "id": "1lGlRzmWfuMbWKNrvzp5oaioLoqyAfM43",
     "title": "הוואז'ה",
+    "name": "הוואז'ה .mp4",
     "size": 33225452,
     "modifiedTime": "2024-08-20T07:06:30.338Z"
    },
    {
     "id": "1d0Eu0IG3JfJg5Y8P_OZPhGscAQmSGkHI",
     "title": "עלאש יא רוחי",
+    "name": "עלאש יא רוחי.mp4",
     "size": 39014648,
     "modifiedTime": "2024-08-20T07:04:50.626Z"
    },
    {
     "id": "1QMd4OWRbTUGwhK8JGQ2Ncm1mjLYXPhdp",
     "title": "קזבלנקה",
+    "name": "קזבלנקה.mp4",
     "size": 7926852,
     "modifiedTime": "2024-08-20T07:06:11.575Z"
    }
@@ -260,18 +280,21 @@
    {
     "id": "1KHhsXA1Ct3TwreY6F0FKIuN1dn5DCX6F",
     "title": "חתן הבר מצווה התלמיד",
+    "name": ".mp4 חתן הבר מצווה התלמיד",
     "size": 5631255,
     "modifiedTime": "2025-10-08T07:11:16.932Z"
    },
    {
     "id": "1Sc6EpMxtWW8kUrPHCGolFdKj8tyLbFoa",
     "title": "ילדים שרים",
+    "name": "ילדים שרים.mp4",
     "size": 9193698,
     "modifiedTime": "2024-07-09T08:39:33Z"
    },
    {
     "id": "1pAIP8ZKY_S7mMiN-ezLHr4-J8VIWnil2",
     "title": "סקסופון",
+    "name": "סקסופון.mp4",
     "size": 2020059,
     "modifiedTime": "2024-07-09T08:32:26Z"
    }
@@ -290,6 +313,7 @@
    {
     "id": "1-Tw2mUtGP67JOWuJ6Gkor_2gUro2wc1i",
     "title": "רקודים 02",
+    "name": "רקודים 02.mp4",
     "size": 3113698,
     "modifiedTime": "2024-07-02T03:45:49Z"
    }
@@ -308,6 +332,7 @@
    {
     "id": "1srINKP9IHGU1QhxrQeO4Ay0EAsRfL0Cp",
     "title": "רקודים 01",
+    "name": "רקודים 01.mp4",
     "size": 5925403,
     "modifiedTime": "2024-07-02T03:44:31Z"
    }
@@ -326,6 +351,7 @@
    {
     "id": "1WEEofJ_LLQ2yNTI7Nylf4i6rVOkILNDp",
     "title": "רקודים 00",
+    "name": "רקודים 00.mp4",
     "size": 2793400,
     "modifiedTime": "2024-07-02T03:53:37Z"
    }
@@ -345,6 +371,7 @@
    {
     "id": "1a_yIFgMx01q6ZIFaFcEFgOyeX3jw_2Mt",
     "title": "מענה שמחה מסיבת חומש",
+    "name": "מענה שמחה מסיבת חומש.mp4",
     "size": 38111146,
     "modifiedTime": "2024-07-01T20:23:24Z"
    }
@@ -363,6 +390,7 @@
    {
     "id": "18Afn9dbOuI78bQ3OdUFMlF9NGG0yFeZM",
     "title": "מסיבת חנוכה בישיבת תורה מציון גבעת זאב עם התלמיד אברהם קס רב פיטוסי",
+    "name": "מסיבת חנוכה בישיבת תורה מציון גבעת זאב עם התלמיד אברהם קס רב פיטוסי.mp4",
     "size": 57756009,
     "modifiedTime": "2024-06-20T08:49:10Z"
    }
@@ -382,7 +410,8 @@
    {
     "id": "1M9M_n5hQndBsgbuPX9GLqlJWBFcxRrlD",
     "title": "והיא שעמדה קאבר סקסופון אשר חיון",
-    "size": 0,
+    "name": "והיא שעמדה קאבר סקסופון אשר חיון.mp3",
+    "size": 7998212,
     "modifiedTime": "2024-04-24T12:00:00.000Z",
     "kind": "audio"
    }
@@ -401,7 +430,8 @@
    {
     "id": "10lNJThla8JYXinGmejonAjrMCqGamxCK",
     "title": "פורים פאנק",
-    "size": 0,
+    "name": "פורים פאנק.mp3",
+    "size": 7161856,
     "modifiedTime": "2024-03-24T12:00:00.000Z",
     "kind": "audio"
    }
@@ -420,7 +450,8 @@
    {
     "id": "1ESoRx7c4NqZhSkMQ_k6ZpLFqF1R1vIK_",
     "title": "פורים ילדים",
-    "size": 0,
+    "name": "פורים ילדים.mp3",
+    "size": 7994036,
     "modifiedTime": "2024-03-24T12:00:00.000Z",
     "kind": "audio"
    }
@@ -439,7 +470,8 @@
    {
     "id": "1tvIk1D_kX87QVFzJl68fT5RtX0fYief2",
     "title": "פורים טראנס",
-    "size": 0,
+    "name": "פורים טראנס.mp3",
+    "size": 5035008,
     "modifiedTime": "2024-03-24T12:00:00.000Z",
     "kind": "audio"
    }
@@ -459,13 +491,15 @@
    {
     "id": "1ubN-ffjfAI-iySf4cU4spd6ib2Dn25TY",
     "title": "מענה שמחה",
-    "size": 0,
+    "name": "מענה שמחה.m4v",
+    "size": 175555173,
     "modifiedTime": "2024-06-20T12:00:00.000Z"
    },
    {
     "id": "1bkIKcZkBtH1SuAwysxfsdfQ_SaPVPLNb",
     "title": "מענה שמחה מקום בגן עדן",
-    "size": 0,
+    "name": "מענה שמחה מקום בגן עדן.mp3",
+    "size": 3481868,
     "modifiedTime": "2024-03-20T12:00:00.000Z",
     "kind": "audio"
    }
@@ -484,7 +518,8 @@
    {
     "id": "1p3Yl_3uKKPg4JzO0_JHdygh5i36lC0bA",
     "title": "ובכל חיידר מוכן 4",
-    "size": 0,
+    "name": "ובכל חיידר מוכן 4.mp3",
+    "size": 9171668,
     "modifiedTime": "2024-03-14T12:00:00.000Z",
     "kind": "audio"
    }
@@ -503,7 +538,8 @@
    {
     "id": "1RPWWEeK4Gz3CP16SMFz8NEbKlHZ9p9QD",
     "title": "הפילים",
-    "size": 0,
+    "name": "הפילים.mp3",
+    "size": 3758592,
     "modifiedTime": "2024-03-13T12:00:00.000Z",
     "kind": "audio"
    }
@@ -523,6 +559,7 @@
    {
     "id": "1gWz-2N0YIFesIvy_K5jNysEJY3oUUO1J",
     "title": "זיץ סוכות לתלמידי המוזיקה",
+    "name": "זיץ סוכות לתלמידי המוזיקה.mp4",
     "size": 9786962,
     "modifiedTime": "2025-10-08T07:18:37.226Z"
    }
@@ -541,6 +578,7 @@
    {
     "id": "1UYS-pDwr6f4U2GkwkOeASzTJg_cQB5oo",
     "title": "אירוסין 2024",
+    "name": "אירוסין 2024.mp4",
     "size": 21001122,
     "modifiedTime": "2025-10-08T10:26:13Z"
    }
@@ -559,6 +597,7 @@
    {
     "id": "1tS_cYZhd0Y8ygfYNWQ1ArviuEbD-jB8V",
     "title": "אירוסין רמות 2023",
+    "name": "אירוסין רמות 2023.m4v",
     "size": 18349305,
     "modifiedTime": "2025-10-08T10:24:59Z"
    }
@@ -578,35 +617,191 @@
    {
     "id": "1y5gC0JxGiN3tlnmG6a8tPpb_cYwP9Q8K",
     "title": "ברית מילה 01",
+    "name": "ברית מילה 01.mp4",
     "size": 13767660,
     "modifiedTime": "2024-07-01T21:28:11Z"
    },
    {
     "id": "1mH3VWupdhd2HWpCI_cbt8jlI8TVbZfwi",
     "title": "ברית מילה 02",
+    "name": "ברית מילה 02.mp4",
     "size": 6355680,
     "modifiedTime": "2024-07-01T21:29:14Z"
    },
    {
     "id": "11G27xBdrDD3PN7jAjOZdNadUvZ7Rr90f",
     "title": "ברית מילה 03",
+    "name": "ברית מילה 03.mp4",
     "size": 25649102,
     "modifiedTime": "2024-07-01T20:49:56Z"
    },
    {
     "id": "1auO_PMep1CIOJl1KdFuYpgMoj4MvAetN",
     "title": "ברית מילה 04",
+    "name": "ברית מילה 04.mp4",
     "size": 8965236,
     "modifiedTime": "2024-07-01T21:30:16Z"
    },
    {
     "id": "1HemLEdZGXma2Pk6ScBXaFhUjyYoLrs7M",
     "title": "ברית מילה 05",
+    "name": "ברית מילה 05.mp4",
     "size": 2449324,
     "modifiedTime": "2024-07-01T21:31:00Z"
    }
   ],
   "addedAt": "2024-07-01T20:53:33.355Z"
+ },
+ {
+  "id": "1lBRVex9fHdWNTy24iTuWPmRcxfT4ISu8",
+  "title": "קבלת שבת לימודי הי",
+  "categories": [
+   "מקהלת ילדים"
+  ],
+  "subcategory": "קבלת שבת לימודי הי",
+  "date": "2022-06-10",
+  "datePrecision": "day",
+  "videos": [
+   {
+    "id": "1H1fScJotMSd4wLI6uVZuVB9ofANVqqxV",
+    "title": "IMG 3239",
+    "name": "IMG_3239.JPG",
+    "size": 505774,
+    "modifiedTime": "2022-06-10T12:00:00.000Z",
+    "kind": "image"
+   },
+   {
+    "id": "1E0eVcBp02Ke4ycusEaSVWACX6QnIHvhu",
+    "title": "IMG 3240",
+    "name": "IMG_3240.JPG",
+    "size": 511200,
+    "modifiedTime": "2022-06-10T12:00:00.000Z",
+    "kind": "image"
+   },
+   {
+    "id": "1PrEOAfu0e8XsbZesEFOZwzafV3NV1pJB",
+    "title": "IMG 3241",
+    "name": "IMG_3241.JPG",
+    "size": 514396,
+    "modifiedTime": "2022-06-10T12:00:00.000Z",
+    "kind": "image"
+   },
+   {
+    "id": "1-2DWMAt3WsKG4zpCsPSnDPCKmXiqstY0",
+    "title": "IMG 3242",
+    "name": "IMG_3242.JPG",
+    "size": 564830,
+    "modifiedTime": "2022-06-10T12:00:00.000Z",
+    "kind": "image"
+   },
+   {
+    "id": "1U7V34t8ZsN5EKT2iAiuIn28TUcrlHLU2",
+    "title": "IMG 3243",
+    "name": "IMG_3243.JPG",
+    "size": 529632,
+    "modifiedTime": "2022-06-10T12:00:00.000Z",
+    "kind": "image"
+   },
+   {
+    "id": "1uQb1iLtQlsIkSF59Ebf9UvwuAFepDtuG",
+    "title": "MVI 3237",
+    "name": "MVI_3237.mp4",
+    "size": 10474510,
+    "modifiedTime": "2022-06-10T12:00:00.000Z"
+   },
+   {
+    "id": "15gXUw1HVdf2qpnxkKerx_36To6Pm6R7z",
+    "title": "MVI 3238",
+    "name": "MVI_3238.mp4",
+    "size": 6776330,
+    "modifiedTime": "2022-06-10T12:00:00.000Z"
+   },
+   {
+    "id": "1rLQsiMNxzl_iT3O75jXikNOVX3L1b1vd",
+    "title": "MVI 3244",
+    "name": "MVI_3244.mp4",
+    "size": 7023989,
+    "modifiedTime": "2022-06-10T12:00:00.000Z"
+   },
+   {
+    "id": "1WlJXvodJzYByGiIyqjNStNeZpwiYpOZJ",
+    "title": "MVI 3245",
+    "name": "MVI_3245.mp4",
+    "size": 8696880,
+    "modifiedTime": "2022-06-10T12:00:00.000Z"
+   },
+   {
+    "id": "1_bkd4BXVbsC-hic7nLJGxQL_pyXigVCQ",
+    "title": "MVI 3246",
+    "name": "MVI_3246.mp4",
+    "size": 9100931,
+    "modifiedTime": "2022-06-10T12:00:00.000Z"
+   },
+   {
+    "id": "1FJPDmExez-Wf83G-fzGv-qVViOihJ3q9",
+    "title": "MVI 3247",
+    "name": "MVI_3247.mp4",
+    "size": 6707799,
+    "modifiedTime": "2022-06-10T12:00:00.000Z"
+   },
+   {
+    "id": "12D6-fCAVaa_DWh2dimokcg_QEkpvRYFE",
+    "title": "MVI 3248",
+    "name": "MVI_3248.mp4",
+    "size": 10787517,
+    "modifiedTime": "2022-06-10T12:00:00.000Z"
+   },
+   {
+    "id": "1dTGwC0WBnr5KJAiZ2RYLM0poAqGae-cK",
+    "title": "MVI 3249",
+    "name": "MVI_3249.mp4",
+    "size": 6948457,
+    "modifiedTime": "2022-06-10T12:00:00.000Z"
+   },
+   {
+    "id": "1ModSLmPkKZIn0UXtHQ38u6NSyU5KfxLr",
+    "title": "MVI 3250",
+    "name": "MVI_3250.mp4",
+    "size": 6825945,
+    "modifiedTime": "2022-06-10T12:00:00.000Z"
+   },
+   {
+    "id": "1cBoPXJxvIO9pbDdauqWCjV9bSqh1savX",
+    "title": "MVI 3251",
+    "name": "MVI_3251.mp4",
+    "size": 11490491,
+    "modifiedTime": "2022-06-10T12:00:00.000Z"
+   },
+   {
+    "id": "1rfRFF6YlCmFz9M5PViSeQ87VcsmxqzaW",
+    "title": "MVI 3252",
+    "name": "MVI_3252.mp4",
+    "size": 7821850,
+    "modifiedTime": "2022-06-10T12:00:00.000Z"
+   },
+   {
+    "id": "1Ey9Bt0nHI2Bu3tzEH8y8rCwthRX8htSc",
+    "title": "MVI 3253",
+    "name": "MVI_3253.mp4",
+    "size": 4007605,
+    "modifiedTime": "2022-06-10T12:00:00.000Z"
+   },
+   {
+    "id": "1VbGyS77HwC7XtHgoCaJGJ1vs66B_fgjk",
+    "title": "MVI 3254",
+    "name": "MVI_3254.mp4",
+    "size": 12648124,
+    "modifiedTime": "2022-06-10T12:00:00.000Z"
+   },
+   {
+    "id": "1JkA0pdJzgreFrJcp4XZX7hFuThzpYqU2",
+    "title": "MVI 3255",
+    "name": "MVI_3255.mp4",
+    "size": 17537451,
+    "modifiedTime": "2022-06-10T12:00:00.000Z"
+   }
+  ],
+  "addedAt": "2026-10-20T07:41:16.176Z"
  },
  {
   "id": "1lNTyKw0joap3R5EWCqSu97EuRSUPb8IE",
@@ -621,18 +816,21 @@
    {
     "id": "1Z-H7ZvxCt8ndlpx790wHlCE5liGLmoua",
     "title": "בר מצוה+חופה",
+    "name": "בר מצוה+חופה.mp4",
     "size": 33935383,
     "modifiedTime": "2024-07-02T04:37:57Z"
    },
    {
     "id": "1rwxJ5VUA8kX9wQKxclWbLi10YGkk7u3j",
     "title": "חופה2022",
+    "name": "חופה2022.mp4",
     "size": 5109239,
     "modifiedTime": "2024-07-02T04:30:16Z"
    },
    {
     "id": "1HdlAQoNrX0IygmfWTMQAJC2tVcEW4n97",
     "title": "סוכות2021",
+    "name": "סוכות2021.mp4",
     "size": 7834651,
     "modifiedTime": "2024-07-02T04:25:30Z"
    }
@@ -652,6 +850,7 @@
    {
     "id": "1582l7hhJoSyPmZPnAugor9A6zrTXyGsb",
     "title": "Santoor-2022",
+    "name": "Santoor-2022.mp4",
     "size": 12408259,
     "modifiedTime": "2024-12-28T19:44:14.411Z"
    }
@@ -671,6 +870,7 @@
    {
     "id": "1gQxCaEnLQXQgdjxOqmeOuQ8LmCu54x4O",
     "title": "סיום שס 2024",
+    "name": "סיום שס_2024.mp4",
     "size": 39396537,
     "modifiedTime": "2024-06-02T16:28:00Z"
    }
@@ -690,12 +890,14 @@
    {
     "id": "1G4gnoRyfAvVeSmf2yyQvKdtFFbVU-Ksu",
     "title": "תפילה הלל 01",
+    "name": "תפילה הלל 01.mp4",
     "size": 5974431,
     "modifiedTime": "2024-07-02T04:15:47Z"
    },
    {
     "id": "1jmtBY0ZQkt6jhaj94nmuJMGihX1U49u9",
     "title": "תפילה הלל 02",
+    "name": "תפילה הלל 02.mp4",
     "size": 1526943,
     "modifiedTime": "2024-07-02T04:18:33Z"
    }

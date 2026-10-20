@@ -27,6 +27,8 @@ export const kindOf = (v: { kind?: "audio" | "image" }): MediaKind => v.kind ?? 
 export interface EventVideo {
   id: string;
   title: string;
+  /** File name in Drive, with its extension. */
+  name?: string;
   size: number;
   modifiedTime: string;
   /** Set for audio recordings and images; videos leave it out. */

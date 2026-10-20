@@ -38,6 +38,7 @@ export function buildEvent(folder: DriveFolder, override: Overrides[string] = {}
     .map((v) => ({
       id: v.id,
       title: cleanVideoTitle(v.name),
+      name: v.name,
       size: Number(v.size ?? 0),
       modifiedTime: v.modifiedTime,
       ...(v.mimeType.startsWith("audio/") && { kind: "audio" as const }),
@@ -70,13 +71,14 @@ export function mergeEvents(
   if (existing.length && !folders.some((f) => f.videos.length))
     throw new Error("Drive listing came back empty - keeping the current events");
 
-  // The public view has no sizes and only day-precision dates: keep what we already know about each video.
+  // The public view has only day-precision dates (and sizes only when Drive answered for them):
+  // keep what we already know about each video.
   if (source === "public") {
     const known = new Map(existing.flatMap((e) => e.videos).map((v) => [v.id, v]));
     for (const f of folders)
       for (const v of f.videos) {
         const prev = known.get(v.id);
-        if (prev) Object.assign(v, { size: String(prev.size), modifiedTime: prev.modifiedTime });
+        if (prev) Object.assign(v, { size: v.size ?? String(prev.size), modifiedTime: prev.modifiedTime });
       }
   }
   const firstRun = existing.length === 0;

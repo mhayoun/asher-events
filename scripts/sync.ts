@@ -27,7 +27,7 @@ async function main() {
     folders = JSON.parse(readFileSync(join(DATA, "drive-snapshot.json"), "utf8")).folders;
   } else {
     console.log(`Reading Drive folder ${ROOT_FOLDER_ID} (${hasDriveCredentials() ? "Drive API" : "public link"}) ...`);
-    folders = await fetchDriveFolders();
+    folders = await fetchDriveFolders(undefined, undefined, { sizes: true });
   }
 
   const existing: EventItem[] = getRedis()

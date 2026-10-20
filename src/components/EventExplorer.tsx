@@ -4,10 +4,10 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { categoryInfo, normalize, OTHER, orderCategories } from "@/lib/categories";
-import { formatEventDate, isNew, mediaCount } from "@/lib/format";
+import { formatEventDate, formatSize, isNew, mediaCount } from "@/lib/format";
 import { tagCloud, titleWords } from "@/lib/tags";
 import { type EventItem, kindOf, type MediaKind } from "@/lib/types";
-import { Thumbnail } from "./Thumbnail";
+import { PlayBadge, Thumbnail } from "./Thumbnail";
 
 type TypeFilter = MediaKind | "all";
 type Filters = { q: string; type: TypeFilter; cat: string; sub: string; tags: string[] };
@@ -290,11 +290,9 @@ function EventCard({ event: e, type }: { event: EventItem; type: TypeFilter }) {
     <article className="group overflow-hidden rounded-2xl border border-line bg-surface transition hover:-translate-y-0.5 hover:border-gold/60 hover:shadow-[0_10px_40px_-10px_#e3b45a40]">
       <Link href={href(first?.id)} className="block">
         <div className="relative aspect-video overflow-hidden bg-surface-2">
-          <Thumbnail fileId={cover?.id} emoji={main.emoji} alt={e.title} />
+          <Thumbnail fileId={cover?.id} emoji={main.emoji} alt={e.title} video={!!cover && kindOf(cover) === "video"} />
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent" />
-          <span className="absolute inset-0 m-auto grid h-14 w-14 place-items-center rounded-full bg-gold/90 text-2xl text-bg opacity-0 transition group-hover:opacity-100">
-            ▶
-          </span>
+          {cover && kindOf(cover) === "video" && <PlayBadge />}
           <span className="absolute bottom-2 left-2 rounded-md bg-black/70 px-2 py-0.5 text-xs">{mediaCount(e.videos)}</span>
           {isNew(e) && <span className="absolute top-2 right-2 rounded-md bg-gold px-2 py-0.5 text-xs font-bold text-bg">חדש</span>}
           <span className="absolute top-2 left-2 max-w-[70%] truncate rounded-md bg-black/70 px-2 py-0.5 text-xs">
@@ -316,7 +314,14 @@ function EventCard({ event: e, type }: { event: EventItem; type: TypeFilter }) {
                   <span aria-hidden className="text-xs">
                     {KIND_ICON[kindOf(v)]}
                   </span>
-                  <span className="line-clamp-1">{v.title}</span>
+                  <span className="line-clamp-1 min-w-0 flex-1" dir="auto">
+                    {v.name ?? v.title}
+                  </span>
+                  {v.size > 0 && (
+                    <span className="shrink-0 text-xs" dir="ltr">
+                      {formatSize(v.size)}
+                    </span>
+                  )}
                 </Link>
               </li>
             ))}

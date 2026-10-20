@@ -81,6 +81,24 @@ async function listPublicChildren(folderId: string, cache: ListingCache) {
 }
 
 /**
+ * Size of a file shared "Anyone with the link", which the public folder view doesn't give:
+ * a one-byte range request, whose Content-Range header ends with the total ("bytes 0-0/12345").
+ */
+async function publicSize(fileId: string, cache: ListingCache): Promise<string | undefined> {
+  try {
+    const res = await fetch(`https://drive.usercontent.google.com/download?id=${fileId}&export=download&confirm=t`, {
+      headers: { Range: "bytes=0-0" },
+      ...fetchOptions(cache),
+      signal: AbortSignal.timeout(15_000),
+    });
+    await res.body?.cancel();
+    return res.headers.get("content-range")?.match(/\/(\d+)$/)?.[1];
+  } catch {
+    return undefined;
+  }
+}
+
+/**
  * Without credentials the folder is read through its public view (it must be shared "Anyone with the link").
  * With credentials the official Drive API is used (exact timestamps and sizes, private folders work):
  *  - GOOGLE_SERVICE_ACCOUNT_JSON: a service-account key (raw JSON or base64). Share the Drive folder
@@ -158,9 +176,19 @@ export async function fetchDriveMedia(fileId: string, range?: string): Promise<R
  *     file, without sub-category.
  * Files placed directly in the root are ignored.
  */
-export async function fetchDriveFolders(rootId = ROOT_FOLDER_ID, cache?: ListingCache): Promise<DriveFolder[]> {
+export async function fetchDriveFolders(
+  rootId = ROOT_FOLDER_ID,
+  cache?: ListingCache,
+  { sizes = false }: { sizes?: boolean } = {},
+): Promise<DriveFolder[]> {
   const auth = hasDriveCredentials() ? await authParams() : null;
-  const list = (id: string) => (auth ? listChildren(id, auth, cache) : listPublicChildren(id, cache));
+  const list = async (id: string) => {
+    if (auth) return listChildren(id, auth, cache);
+    const children: (Awaited<ReturnType<typeof listPublicChildren>>[number] & { size?: string })[] = await listPublicChildren(id, cache);
+    // One request per file, slow: only the daily sync asks for sizes; pages keep the sizes it saved.
+    if (sizes) await Promise.all(children.filter((f) => isMediaMime(f.mimeType)).map(async (f) => (f.size = await publicSize(f.id, cache))));
+    return children;
+  };
   const isFolder = (f: { mimeType: string }) => f.mimeType === FOLDER_MIME;
   const isMedia = (f: { mimeType: string }) => isMediaMime(f.mimeType);
 

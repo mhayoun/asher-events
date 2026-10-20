@@ -6,6 +6,14 @@ export function formatEventDate(e: Pick<EventItem, "date" | "datePrecision">): s
   return e.datePrecision === "year" ? e.date.slice(0, 4) : dayFmt.format(new Date(`${e.date}T12:00:00Z`));
 }
 
+export function formatSize(bytes: number): string {
+  return bytes ? `${(bytes / 1_048_576).toFixed(bytes > 100 * 1_048_576 ? 0 : 1)} MB` : "";
+}
+
+/** "IMG_1234.jpg · 3.2 MB" (the size only when known). */
+export const fileLabel = (v: { name?: string; title: string; size: number }) =>
+  [v.name ?? v.title, formatSize(v.size)].filter(Boolean).join(" · ");
+
 /** Drive's public thumbnail endpoint. Works when the file is shared "Anyone with the link". */
 export const thumbnailUrl = (fileId: string, width = 640) =>
   `https://drive.google.com/thumbnail?id=${fileId}&sz=w${width}`;
