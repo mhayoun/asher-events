@@ -481,7 +481,8 @@ function CompressDrive({ busy, setBusy }: Busy) {
           if (signal.aborted) break;
           failed++;
           console.error(err);
-          update(file.id, { status: "שגיאה - הקובץ נשאר כמו שהוא", error: true, progress: undefined });
+          const reason = err instanceof Error ? err.message : String(err);
+          update(file.id, { status: `שגיאה - הקובץ נשאר כמו שהוא (${reason})`, error: true, progress: undefined });
         }
       }
       const result = [`${count} קבצים נדחסו, נחסכו ${mb(saved)}`];
@@ -567,9 +568,9 @@ function Rows({ rows }: { rows: Row[] }) {
     <ul className="max-h-72 space-y-1.5 overflow-y-auto rounded-xl border border-line p-2 text-sm">
       {rows.map((r) => (
         <li key={r.key}>
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center justify-between gap-x-2">
             <span className="min-w-0 truncate">{r.name}</span>
-            <span className={`shrink-0 text-xs ${r.error ? "text-red-400" : "text-muted"}`}>
+            <span className={`text-xs ${r.error ? "break-all text-red-400" : "shrink-0 text-muted"}`}>
               {r.status}
               {r.progress !== undefined && ` ${Math.round(r.progress * 100)}%`}
             </span>

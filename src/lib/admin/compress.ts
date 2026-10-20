@@ -125,13 +125,60 @@ export async function compressPhoto(original: Blob): Promise<Blob> {
   return new Blob([withExif as BlobPart], { type: "image/jpeg" });
 }
 
+type Mediabunny = typeof import("mediabunny");
+
+/**
+ * Some phones (files named "video-2021-…") write H.264 profile 0 in the video's header ("avc1.00a00b"),
+ * which Chrome refuses to decode although the stream itself is plain Baseline. This decoder takes the
+ * real profile from the stream's SPS and decodes with that.
+ */
+function registerFixedProfileDecoder({ CustomVideoDecoder, VideoSample, registerDecoder }: Mediabunny) {
+  const hex = (n: number) => n.toString(16).padStart(2, "0");
+  function fixConfig(config: VideoDecoderConfig): VideoDecoderConfig {
+    const d = config.description;
+    const avcc = d ? (ArrayBuffer.isView(d) ? new Uint8Array(d.buffer, d.byteOffset, d.byteLength) : new Uint8Array(d)).slice() : null;
+    // avcC: version, profile, compatibility, level, length size, SPS count, SPS length (2 bytes), then the SPS NAL
+    // whose bytes 1-3 are again profile, compatibility, level.
+    if (!avcc || avcc.length < 12 || avcc[9] === 0) return { ...config, codec: "avc1.42E01F" };
+    avcc.set([avcc[9], avcc[10], avcc[11]], 1);
+    return { ...config, codec: `avc1.${hex(avcc[9])}${hex(avcc[10])}${hex(avcc[11])}`, description: avcc };
+  }
+  class FixedProfileAvcDecoder extends CustomVideoDecoder {
+    private decoder: VideoDecoder | null = null;
+    static override supports(codec: string, config: VideoDecoderConfig) {
+      return codec === "avc" && /^avc1\.00/i.test(config.codec) && typeof VideoDecoder !== "undefined";
+    }
+    init() {
+      this.decoder = new VideoDecoder({ output: (frame) => this.onSample(new VideoSample(frame)), error: (e) => this.onError(e) });
+      this.decoder.configure(fixConfig(this.config));
+    }
+    decode(packet: import("mediabunny").EncodedPacket) {
+      this.decoder!.decode(packet.toEncodedVideoChunk());
+    }
+    flush() {
+      return this.decoder!.flush();
+    }
+    close() {
+      this.decoder?.close();
+    }
+  }
+  registerDecoder(FixedProfileAvcDecoder);
+}
+
+let mediabunny: Promise<Mediabunny> | null = null;
+const loadMediabunny = () =>
+  (mediabunny ??= import("mediabunny").then((m) => {
+    registerFixedProfileDecoder(m);
+    return m;
+  }));
+
 /** Re-encodes a video to H.264/AAC MP4, from a local file or a Drive file read piece by piece. */
 export async function compressVideo(
   from: Blob | { id: string; size: number },
   onProgress: (p: number) => void,
   signal: AbortSignal,
 ): Promise<Blob> {
-  const { ALL_FORMATS, BlobSource, BufferSource, BufferTarget, Conversion, CustomSource, Input, Mp4OutputFormat, Output } = await import("mediabunny");
+  const { ALL_FORMATS, BlobSource, BufferSource, BufferTarget, Conversion, CustomSource, Input, Mp4OutputFormat, Output } = await loadMediabunny();
   const input = new Input({
     formats: ALL_FORMATS,
     source:
