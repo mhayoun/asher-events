@@ -131,7 +131,7 @@ export async function compressVideo(
   onProgress: (p: number) => void,
   signal: AbortSignal,
 ): Promise<Blob> {
-  const { ALL_FORMATS, BlobSource, BufferTarget, Conversion, CustomSource, Input, Mp4OutputFormat, Output } = await import("mediabunny");
+  const { ALL_FORMATS, BlobSource, BufferSource, BufferTarget, Conversion, CustomSource, Input, Mp4OutputFormat, Output } = await import("mediabunny");
   const input = new Input({
     formats: ALL_FORMATS,
     source:
@@ -159,10 +159,15 @@ export async function compressVideo(
       // AAC sound (most phone videos) is copied as is; other formats are converted.
       audio: (track) => (track.codec === "aac" ? {} : { codec: "aac", bitrate: SETTINGS.audioBitrate }),
       tags: (tags) => tags,
+      showWarnings: false,
     });
     if (!conversion.isValid) throw new Error("video format not supported");
-    // Never produce a silent video: if the sound cannot be kept, keep the original.
-    if (conversion.discardedTracks.some((d) => d.track.type === "audio")) throw new Error("the sound of this video cannot be kept");
+    // A track mediabunny can't convert is silently left out: never lose the picture or the sound,
+    // keep the original instead (a video without its picture played as a black screen).
+    const lost = conversion.discardedTracks.find((d) => d.track.type === "video" || d.track.type === "audio");
+    if (lost) throw new Error(`the ${lost.track.type} of this video cannot be kept (${lost.reason})`);
+    const sourceDuration = await input.computeDuration();
+    const hadVideo = (await input.getVideoTracks()).length > 0;
     conversion.onProgress = onProgress;
     const stop = () => void conversion.cancel();
     signal.addEventListener("abort", stop, { once: true });
@@ -172,9 +177,28 @@ export async function compressVideo(
       signal.removeEventListener("abort", stop);
     }
     signal.throwIfAborted();
+    await checkOutput(target.buffer!, hadVideo, sourceDuration, { ALL_FORMATS, BufferSource, Input });
     return new Blob([target.buffer!], { type: "video/mp4" });
   } finally {
     input.dispose();
+  }
+}
+
+/** Reads the new file back: it must still have its picture and last as long as the original. */
+async function checkOutput(
+  buffer: ArrayBuffer,
+  hadVideo: boolean,
+  sourceDuration: number,
+  m: Pick<typeof import("mediabunny"), "ALL_FORMATS" | "BufferSource" | "Input">,
+) {
+  const out = new m.Input({ formats: m.ALL_FORMATS, source: new m.BufferSource(buffer) });
+  try {
+    if (hadVideo && !(await out.getPrimaryVideoTrack())) throw new Error("the compressed video has no picture");
+    const duration = await out.computeDuration();
+    if (Math.abs(duration - sourceDuration) > Math.max(1, sourceDuration * 0.02))
+      throw new Error(`the compressed video lasts ${duration.toFixed(1)} s instead of ${sourceDuration.toFixed(1)} s`);
+  } finally {
+    out.dispose();
   }
 }
 
