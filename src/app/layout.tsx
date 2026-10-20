@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { Heebo, Frank_Ruhl_Libre } from "next/font/google";
 import Link from "next/link";
+import { AdminPanel } from "@/components/AdminPanel";
 import { Logo } from "@/components/Logo";
 import { NavLinks } from "@/components/NavLinks";
-import { SyncButton } from "@/components/SyncButton";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import "./globals.css";
 
@@ -35,7 +35,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <main className="flex-1">{children}</main>
         <footer className="flex flex-col items-center gap-3 border-t border-line py-6 text-center text-sm text-muted">
           <p>© {new Date().getFullYear()} אשר חיון · כל הסרטונים מתעדכנים אוטומטית מתיקיית האירועים</p>
-          <SyncButton />
+          <AdminPanel />
         </footer>
       </body>
     </html>

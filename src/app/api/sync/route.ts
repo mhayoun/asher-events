@@ -1,5 +1,5 @@
 import { revalidateTag } from "next/cache";
-import { checkSyncPassword } from "@/lib/auth";
+import { isDriveEditor } from "@/lib/auth";
 import { fetchDriveFolders } from "@/lib/drive";
 import { DRIVE_CACHE_TAG, driveSource, getPublicEvents } from "@/lib/events";
 import { loadEvents, overrides } from "@/lib/store";
@@ -9,13 +9,12 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 /**
- * The "sync now" button on the site. Reads Drive fresh, reports what visitors haven't seen yet,
+ * The "update the site" action of the teacher's panel (signed in with Google, see AdminPanel). Reads Drive fresh, reports what visitors haven't seen yet,
  * and expires the cached Drive listing so every page shows the new content on the next request.
  * The daily GitHub Action still commits the result to data/ for safekeeping.
  */
 export async function POST(request: Request) {
-  const body = await request.json().catch(() => ({}));
-  if (!checkSyncPassword(body?.password)) return Response.json({ error: "wrong password" }, { status: 401 });
+  if (!(await isDriveEditor(request))) return Response.json({ error: "not allowed" }, { status: 401 });
 
   const [shown, saved, folders] = await Promise.all([getPublicEvents(), loadEvents(), fetchDriveFolders()]);
   const fresh = mergeEvents(folders, saved, overrides, driveSource()).events.filter((e) => !e.hidden);

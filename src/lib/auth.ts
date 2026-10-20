@@ -1,4 +1,4 @@
-import { createHash, timingSafeEqual } from "node:crypto";
+import { ROOT_FOLDER_ID } from "./drive";
 
 /** True when the request carries `Authorization: Bearer $CRON_SECRET` (Vercel Cron sends exactly this). */
 export function isAuthorized(request: Request): boolean {
@@ -6,11 +6,16 @@ export function isAuthorized(request: Request): boolean {
   return Boolean(secret) && request.headers.get("authorization") === `Bearer ${secret}`;
 }
 
-/** Checks the password of the site's sync button (SYNC_PASSWORD) without leaking timing. */
-export function checkSyncPassword(password: unknown): boolean {
-  const expected = process.env.SYNC_PASSWORD;
-  if (!expected || typeof password !== "string") return false;
-  const a = createHash("sha256").update(password).digest();
-  const b = createHash("sha256").update(expected).digest();
-  return timingSafeEqual(a, b);
+/**
+ * True when the request carries the Google token of an account that can add files to the events
+ * folder in Drive (the teacher, signed in on the site). Google itself checks the token.
+ */
+export async function isDriveEditor(request: Request): Promise<boolean> {
+  const token = request.headers.get("authorization")?.match(/^Bearer (.+)$/)?.[1];
+  if (!token) return false;
+  const res = await fetch(
+    `https://www.googleapis.com/drive/v3/files/${ROOT_FOLDER_ID}?fields=capabilities(canAddChildren)&supportsAllDrives=true`,
+    { headers: { Authorization: `Bearer ${token}` }, cache: "no-store" },
+  );
+  return res.ok && Boolean((await res.json()).capabilities?.canAddChildren);
 }
