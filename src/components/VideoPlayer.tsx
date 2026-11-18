@@ -2,27 +2,33 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { driveFileUrl, embedUrl, fileLabel, formatSize, mediaUrl, thumbnailUrl } from "@/lib/format";
+import { directMediaUrl, driveFileUrl, embedUrl, fileLabel, formatSize, mediaUrl, thumbnailUrl } from "@/lib/format";
 import type { EventVideo } from "@/lib/types";
 import { PlayBadge, Thumbnail } from "./Thumbnail";
 
 /**
- * Plays with the browser's own <video>/<audio>, streamed through the site (or from Blob). Drive's
- * embedded player needs third-party cookies, which phones block, so it showed a black screen there.
- * Formats the browser can't play (e.g. .3gp) fall back to the Drive player automatically.
+ * Plays with the browser's own <video>/<audio>. Drive's embedded player needs third-party cookies,
+ * which phones block, so it showed a black screen there. Sources, each tried when the previous fails:
+ *  1. Blob copy if any, else Drive's download URL directly (no Vercel traffic);
+ *  2. the site's own stream (/api/media), which every browser plays but costs Fast Origin Transfer;
+ *  3. the Drive player (also for formats the browser can't play, e.g. .3gp).
  */
 export function VideoPlayer({ videos, emoji }: { videos: EventVideo[]; emoji: string }) {
   const params = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
-  const [useDrivePlayer, setUseDrivePlayer] = useState<Set<string>>(new Set());
+  // how many sources failed per file (see above)
+  const [failures, setFailures] = useState<Record<string, number>>({});
   const current = videos.find((v) => v.id === params.get("v")) ?? videos[0];
   if (!current) return <p className="text-muted">אין עדיין סרטונים באירוע הזה.</p>;
 
   const select = (id: string) => router.replace(`${pathname}?v=${id}`, { scroll: false });
-  const fallBack = () => setUseDrivePlayer((prev) => new Set(prev).add(current.id));
-  const src = current.url ?? mediaUrl(current.id);
-  const native = !useDrivePlayer.has(current.id);
+  const failed = failures[current.id] ?? 0;
+  const fallBack = () => setFailures((prev) => ({ ...prev, [current.id]: failed + 1 }));
+  const src = failed === 0 ? (current.url ?? directMediaUrl(current.id)) : mediaUrl(current.id);
+  const native = failed < 2;
+  // Nothing goes through the site's stream before someone presses play.
+  const preload = failed === 0 ? "metadata" : "none";
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
@@ -53,16 +59,17 @@ export function VideoPlayer({ videos, emoji }: { videos: EventVideo[]; emoji: st
               <span className="text-7xl" aria-hidden>
                 🎧
               </span>
-              <audio key={current.id} src={src} controls preload="metadata" onError={fallBack} className="w-full max-w-lg" />
+              <audio key={src} src={src} crossOrigin="anonymous" controls preload={preload} onError={fallBack} className="w-full max-w-lg" />
             </div>
           ) : (
             <video
-              key={current.id}
+              key={src}
               src={src}
+              crossOrigin="anonymous"
               poster={thumbnailUrl(current.id, 1280)}
               controls
               playsInline
-              preload="metadata"
+              preload={preload}
               onError={fallBack}
               className="absolute inset-0 h-full w-full"
             />

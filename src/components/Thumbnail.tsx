@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { mediaUrl, thumbnailUrl } from "@/lib/format";
+import { directMediaUrl, thumbnailUrl } from "@/lib/format";
 
 /**
  * Drive thumbnail over a decorative placeholder. The placeholder stays visible while the image loads
@@ -53,7 +53,8 @@ export function Thumbnail({
       )}
       {state === "failed" && video && fileId && (
         <video
-          src={`${mediaUrl(fileId)}#t=1`}
+          src={`${directMediaUrl(fileId)}#t=1`}
+          crossOrigin="anonymous"
           preload="metadata"
           muted
           playsInline

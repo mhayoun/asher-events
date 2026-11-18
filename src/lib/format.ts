@@ -18,8 +18,17 @@ export const fileLabel = (v: { name?: string; title: string; size: number }) =>
 export const thumbnailUrl = (fileId: string, width = 640) =>
   `https://drive.google.com/thumbnail?id=${fileId}&sz=w${width}`;
 
-/** Same-origin stream of a Drive file for <video>/<audio> (see app/api/media/[id]/route.ts). */
+/** Same-origin stream of a Drive file for <video>/<audio> (see app/api/media/[id]/route.ts).
+ *  Every byte goes through a Vercel Function (billed as Fast Origin Transfer), so it is only the fallback. */
 export const mediaUrl = (fileId: string) => `/api/media/${fileId}`;
+
+/**
+ * Drive's own download URL for a file shared "Anyone with the link". It honours byte ranges and
+ * answers CORS with "*"; its Cross-Origin-Resource-Policy (same-site) blocks a plain cross-site
+ * <video>, so the element must load it in CORS mode: crossOrigin="anonymous".
+ */
+export const directMediaUrl = (fileId: string) =>
+  `https://drive.usercontent.google.com/download?id=${fileId}&export=download&confirm=t`;
 
 export const embedUrl = (fileId: string) => `https://drive.google.com/file/d/${fileId}/preview`;
 export const driveFileUrl = (fileId: string) => `https://drive.google.com/file/d/${fileId}/view`;
