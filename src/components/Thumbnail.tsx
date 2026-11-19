@@ -51,7 +51,8 @@ export function Thumbnail({
           }`}
         />
       )}
-      {state === "failed" && video && fileId && (
+      {/* Frame grab only from the direct URL: through the site's stream it would cost Vercel traffic. */}
+      {state === "failed" && video && fileId && directMediaUrl(fileId) && (
         <video
           src={`${directMediaUrl(fileId)}#t=1`}
           crossOrigin="anonymous"

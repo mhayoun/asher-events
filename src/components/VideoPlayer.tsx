@@ -9,7 +9,7 @@ import { PlayBadge, Thumbnail } from "./Thumbnail";
 /**
  * Plays with the browser's own <video>/<audio>. Drive's embedded player needs third-party cookies,
  * which phones block, so it showed a black screen there. Sources, each tried when the previous fails:
- *  1. Blob copy if any, else Drive's download URL directly (no Vercel traffic);
+ *  1. Blob copy if any, else the Drive API URL directly (no Vercel traffic; needs NEXT_PUBLIC_GOOGLE_API_KEY);
  *  2. the site's own stream (/api/media), which every browser plays but costs Fast Origin Transfer;
  *  3. the Drive player (also for formats the browser can't play, e.g. .3gp).
  */
@@ -23,9 +23,11 @@ export function VideoPlayer({ videos, emoji }: { videos: EventVideo[]; emoji: st
   if (!current) return <p className="text-muted">אין עדיין סרטונים באירוע הזה.</p>;
 
   const select = (id: string) => router.replace(`${pathname}?v=${id}`, { scroll: false });
-  const failed = failures[current.id] ?? 0;
+  const direct = current.url ?? directMediaUrl(current.id);
+  // No direct URL (no API key): start at the site's stream.
+  const failed = failures[current.id] ?? (direct ? 0 : 1);
   const fallBack = () => setFailures((prev) => ({ ...prev, [current.id]: failed + 1 }));
-  const src = failed === 0 ? (current.url ?? directMediaUrl(current.id)) : mediaUrl(current.id);
+  const src = failed === 0 && direct ? direct : mediaUrl(current.id);
   const native = failed < 2;
   // Nothing goes through the site's stream before someone presses play.
   const preload = failed === 0 ? "metadata" : "none";

@@ -22,13 +22,18 @@ export const thumbnailUrl = (fileId: string, width = 640) =>
  *  Every byte goes through a Vercel Function (billed as Fast Origin Transfer), so it is only the fallback. */
 export const mediaUrl = (fileId: string) => `/api/media/${fileId}`;
 
+/** Browser API key: restricted in Google Cloud to the Drive API and to the site's own referrers. */
+const PUBLIC_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_API_KEY;
+
 /**
- * Drive's own download URL for a file shared "Anyone with the link". It honours byte ranges and
- * answers CORS with "*"; its Cross-Origin-Resource-Policy (same-site) blocks a plain cross-site
- * <video>, so the element must load it in CORS mode: crossOrigin="anonymous".
+ * Direct URL of a file shared "Anyone with the link", played by the browser without Vercel traffic.
+ * The Drive API honours byte ranges and answers CORS for the calling origin; load it in CORS mode
+ * (crossOrigin="anonymous"). drive.usercontent.google.com is no use here: since Nov 2026 it answers
+ * 403/503 to every request carrying `Sec-Fetch-Site: cross-site`, which all browsers send.
+ * Without a key there is no direct URL, so the player goes straight to the site's stream.
  */
 export const directMediaUrl = (fileId: string) =>
-  `https://drive.usercontent.google.com/download?id=${fileId}&export=download&confirm=t`;
+  PUBLIC_API_KEY ? `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${PUBLIC_API_KEY}` : undefined;
 
 export const embedUrl = (fileId: string) => `https://drive.google.com/file/d/${fileId}/preview`;
 export const driveFileUrl = (fileId: string) => `https://drive.google.com/file/d/${fileId}/view`;
